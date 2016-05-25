@@ -1,95 +1,42 @@
 package fukie.afterall;
 
-import android.Manifest;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.CalendarContract;
-import android.support.annotation.RequiresPermission;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-
-import java.util.Calendar;
-import java.util.TimeZone;
-
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
-    public static final String[] EVENT_PROJECTION = new String[]{
-            CalendarContract.Calendars._ID,                           // 0
-            CalendarContract.Calendars.ACCOUNT_NAME,                  // 1
-            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,         // 2
-            CalendarContract.Calendars.OWNER_ACCOUNT                  // 3
-    };
-
-    // The indices for the projection array above.
-    private static final int PROJECTION_ID_INDEX = 0;
-    private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
-    private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
-    private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;
-    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
-    TextView textView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = (TextView) findViewById(R.id.txtHello);
-        Cursor cur;
-        ContentResolver cr = getContentResolver();
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
-        String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
-                + CalendarContract.Calendars.ACCOUNT_TYPE + " = ?) AND ("
-                + CalendarContract.Calendars.OWNER_ACCOUNT + " = ?))";
-        String[] selectionArgs = new String[]{"iamstevendao@gmail.com", "com.google",
-                "iamstevendao@gmail.com"};
-// Submit the query and get a Cursor object back.
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);
-            while (cur.moveToNext()) {
-
-                long calID = cur.getLong(PROJECTION_ID_INDEX);
-                String displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
-                String accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
-                String ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-
-                // Do something with the values...
-                String s = calID + " " + displayName + " " + accountName + " " + ownerName;
-                textView.setText(s);
-            }
+        TextView textView = (TextView) findViewById(R.id.txtHello);
+        Button bttnAddEvent = (Button) findViewById(R.id.bttnAddEvent);
+        DBHelper dbHelper = new DBHelper(this);
+        try {
+            dbHelper.addExample();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        long calID = 4;
-        long startMillis = 0;
-        long endMillis = 0;
-        Calendar beginTime = Calendar.getInstance();
-        beginTime.set(2016, 5, 22, 7, 30);
-        startMillis = beginTime.getTimeInMillis();
-        Calendar endTime = Calendar.getInstance();
-        endTime.set(2012, 5, 22, 8, 45);
-        endMillis = endTime.getTimeInMillis();
-      //  cr = getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put(CalendarContract.Events.DTSTART, startMillis);
-        values.put(CalendarContract.Events.DTEND, endMillis);
-        values.put(CalendarContract.Events.TITLE, "Jazzercise");
-        values.put(CalendarContract.Events.DESCRIPTION, "Group workout");
-        values.put(CalendarContract.Events.CALENDAR_ID, calID);
-        TimeZone tz = TimeZone.getDefault();
-        values.put(CalendarContract.Events.EVENT_TIMEZONE, tz.getID());
-       // values.put("eventTimezone", "Europe/London");
-        uri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
-
-// get the event ID that is the last element in the Uri
-        long eventID = Long.parseLong(uri.getLastPathSegment());
-        String s = textView.getText().toString();
-        s+= " e: " + eventID;
+        String s = "";
+        List<Events> events = dbHelper.getAllEvents();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        for (Events event : events) {
+            s += "Event: " + event.name +
+                    " Date: " + sdf.format(event.date) +
+                    " Loop: " + Boolean.toString(event.loop) +
+                    " Memory: " + event.memory;
+        }
         textView.setText(s);
     }
 
-
+    public void addEvent(View target) {
+        Intent intent = new Intent(MainActivity.this, AddEvent.class);
+        startActivity(intent);
+    }
 }

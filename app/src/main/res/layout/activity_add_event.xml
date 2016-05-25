@@ -7,16 +7,6 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="fukie.afterall.MainActivity">
+    tools:context="fukie.afterall.AddEvent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtHello"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="add Event"
-        android:id="@+id/bttnAddEvent"
-        android:onClick="addEvent"/>
 </RelativeLayout>
