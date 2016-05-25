@@ -34,7 +34,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // TODO Auto-generated method stub
-        db.execSQL("DROP TABLE IF EXISTS events");
+       // db.execSQL("DROP TABLE IF EXISTS events");
         db.execSQL(
                 "create table events " +
                         "(id integer primary key, name text, " +
