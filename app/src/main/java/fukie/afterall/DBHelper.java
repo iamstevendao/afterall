@@ -98,4 +98,30 @@ public class DBHelper extends SQLiteOpenHelper {
         res.close();
         return events;
     }
+
+    public List<MainActivity.ListViewItem> getAllEvent() {
+        List<MainActivity.ListViewItem> events = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from events", null);
+        res.moveToFirst();
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            while (!res.isAfterLast()) {
+                Date today = new Date();
+                long diff =  sdf.parse(res.getString(res.getColumnIndex(EVENTS_COLUMN_DATE))).getTime() - today.getTime();
+                int diffDays = (int)(diff / (60 * 60 * 1000 * 24));
+                String type = res.getString(res.getColumnIndex(EVENTS_COLUMN_TYPE));
+                MainActivity.ListViewItem event = new MainActivity.ListViewItem(
+                        res.getString(res.getColumnIndex(EVENTS_COLUMN_NAME)),
+                        diffDays,
+                        Constant.getEventTypeId(type));
+                events.add(event);
+                res.moveToNext();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        res.close();
+        return events;
+    }
 }
