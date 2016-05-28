@@ -29,16 +29,16 @@ public class DBHelper extends SQLiteOpenHelper {
     public DBHelper(Context context)
     {
         super(context, DATABASE_NAME , null, 1);
+        //context.deleteDatabase(DATABASE_NAME);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         // TODO Auto-generated method stub
-       // db.execSQL("DROP TABLE IF EXISTS events");
         db.execSQL(
                 "create table events " +
                         "(id integer primary key, name text, " +
-                        "type text,date date, loop boolean, memory text)"
+                        "type text, date date, loop boolean, memory text)"
         );
     }
 
@@ -49,25 +49,28 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertContact(String name, String type, Date date, boolean loop, String memory)
+    public void dropTable(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS events");
+    }
+
+    public void insertContact(String name, String type, String date, boolean loop, String memory)
     {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", name);
         contentValues.put("type", type);
-        contentValues.put("date", sdf.format(date));
+        contentValues.put("date", date);
         contentValues.put("loop", loop);
         contentValues.put("memory", memory);
         db.insert("events", null, contentValues);
     }
 
     public void addExample() throws Exception{
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        insertContact("yeu", "YEU", sdf.parse("2016-5-23"), false, "100 days");
-        insertContact("hoc", "HOC", sdf.parse("2016-5-24"), true, "200 days");
-        insertContact("an", "AN", sdf.parse("2016-5-25"), true, "300 days");
-        insertContact("ngu", "NGU", sdf.parse("2016-5-26"), false, "100 days");
+        insertContact("yeu", "ANNIVERSARY", "2016-5-23", false, "100 days");
+        insertContact("hoc", "EDUCATION", "2016-5-24", true, "200 days");
+        insertContact("an", "OTHER", "2016-5-25", true, "300 days");
+        insertContact("ngu", "LIFE", "2016-5-26", false, "100 days");
     }
 
     public int getNumberOfEvents(){
@@ -83,6 +86,7 @@ public class DBHelper extends SQLiteOpenHelper {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             while (!res.isAfterLast()) {
+                String type = res.getString(res.getColumnIndex(EVENTS_COLUMN_TYPE));
                 Events event = new Events(
                         res.getString(res.getColumnIndex(EVENTS_COLUMN_NAME)),
                         res.getString(res.getColumnIndex(EVENTS_COLUMN_TYPE)),
@@ -108,7 +112,8 @@ public class DBHelper extends SQLiteOpenHelper {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             while (!res.isAfterLast()) {
                 Date today = new Date();
-                long diff =  sdf.parse(res.getString(res.getColumnIndex(EVENTS_COLUMN_DATE))).getTime() - today.getTime();
+                long diff =  sdf.parse(res.getString(
+                        res.getColumnIndex(EVENTS_COLUMN_DATE))).getTime() - today.getTime();
                 int diffDays = (int)(diff / (60 * 60 * 1000 * 24));
                 String type = res.getString(res.getColumnIndex(EVENTS_COLUMN_TYPE));
                 MainActivity.ListViewItem event = new MainActivity.ListViewItem(

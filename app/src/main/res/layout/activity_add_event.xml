@@ -28,7 +28,7 @@
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:eventName="loop?"
+        android:text="loop?"
         android:id="@+id/chckLoop"/>
     <RadioGroup
         android:layout_width="wrap_content"
@@ -38,23 +38,23 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:eventName="100days"
+            android:text="100days"
             android:id="@+id/rd100"
             android:checked="true"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:eventName="year"
+            android:text="year"
             android:id="@+id/rdYear"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:eventName="month"
+            android:text="month"
             android:id="@+id/rdMonth"/>
     </RadioGroup>
     <Button android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:eventName="submit"
+        android:text="submit"
         android:onClick="submitAddEvent" />
 
 </LinearLayout>

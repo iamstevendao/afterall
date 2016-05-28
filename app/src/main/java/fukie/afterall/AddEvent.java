@@ -67,7 +67,7 @@ public class AddEvent extends AppCompatActivity {
                 && txtType.getText().toString().length() >0)
         dbHelper.insertContact(txtName.getText().toString(),
                 txtType.getText().toString(),
-                sdf.parse(txtDate.getText().toString()),
+                txtDate.getText().toString(),
                 chckLoop.isChecked(),
                 "100days");
     }

@@ -10,19 +10,23 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
-    TextView txtHello;
+   // TextView txtHello;
     DBHelper dbHelper;
     ListView lstEvent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        txtHello = (TextView) findViewById(R.id.txtHello);
+     //   txtHello = (TextView) findViewById(R.id.txtHello);
         lstEvent = (ListView) findViewById(R.id.lstEvent);
+//        dbHelper.dropTable();
         dbHelper = new DBHelper(this);
         try {
             dbHelper.addExample();
@@ -39,7 +43,13 @@ public class MainActivity extends AppCompatActivity {
                     " Loop: " + Boolean.toString(event.loop) +
                     " Memory: " + event.memory;
         }
-        txtHello.setText(s);
+    //    txtHello.setText(s);
+
+        List<ListViewItem> listViewItems = dbHelper.getAllEvent();
+        ListViewItem[] listViewItems1 = new ListViewItem[listViewItems.size()];
+        listViewItems.toArray(listViewItems1);
+        CustomAdapter customAdapter = new CustomAdapter(this, R.id.text, listViewItems1);
+        lstEvent.setAdapter(customAdapter);
     }
 //
 //    @Override
