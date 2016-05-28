@@ -3,7 +3,6 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorFAB">#FF4081</color>
     <color name="white">#FFFFFF</color>
     <color name="yellow">#FFFF00</color>
     <color name="fuchsia">#FF00FF</color>
@@ -23,5 +22,11 @@
     <color name="background_all">#f5f5f5</color>
     <color name="transparent">#00000000</color>
     <color name="black_transparent">#4D000000</color>
+    <color name="pink_transparent">#CCFF4081</color>
+    <color name="blue_transparent">#CC000080</color>
+    <color name="green_transparent">#CC008000</color>
+    <color name="yellow_transparent">#CC808000</color>
+    <color name="gray_transparent">#CC808080</color>
+    <color name="red_transparent">#CC800000</color>
     <color name="edittext_background">#f44336</color>
 </resources>

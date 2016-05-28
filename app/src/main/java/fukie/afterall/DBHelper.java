@@ -52,6 +52,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void dropTable(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DROP TABLE IF EXISTS events");
+        onCreate(db);
     }
 
     public void insertContact(String name, String type, String date, boolean loop, String memory)
