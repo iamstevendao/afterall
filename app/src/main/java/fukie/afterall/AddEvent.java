@@ -70,5 +70,7 @@ public class AddEvent extends AppCompatActivity {
                 txtDate.getText().toString(),
                 chckLoop.isChecked(),
                 "100days");
+        Intent intent = new Intent(AddEvent.this, MainActivity.class);
+        startActivity(intent);
     }
 }

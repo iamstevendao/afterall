@@ -33,12 +33,12 @@ public class MainActivity extends AppCompatActivity {
         lstEvent = (ListView) findViewById(R.id.lstEvent);
 
         dbHelper = new DBHelper(this);
-        dbHelper.dropTable();
-        try {
-            dbHelper.addExample();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+      // dbHelper.dropTable();
+//        try {
+//            dbHelper.addExample();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 //        String s = "";
 //        List<Events> events = dbHelper.getAllEvents();

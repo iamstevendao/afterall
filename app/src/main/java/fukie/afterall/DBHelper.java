@@ -19,7 +19,7 @@ import java.util.Locale;
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "afterall.db";
     public static final String EVENTS_TABLE_NAME = "events";
-    public static final String EVENTS_COLUMN_ID = "id";
+    public static final String EVENTS_COLUMN_ID = "_id";
     public static final String EVENTS_COLUMN_NAME = "name";
     public static final String EVENTS_COLUMN_TYPE = "type";
     public static final String EVENTS_COLUMN_DATE = "date";
@@ -37,7 +37,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         db.execSQL(
                 "create table events " +
-                        "(id integer primary key, name text, " +
+                        "(_id integer primary key autoincrement, name text, " +
                         "type text, date date, loop boolean, memory text)"
         );
     }
@@ -45,12 +45,6 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // TODO Auto-generated method stub
-        db.execSQL("DROP TABLE IF EXISTS events");
-        onCreate(db);
-    }
-
-    public void dropTable(){
-        SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DROP TABLE IF EXISTS events");
         onCreate(db);
     }
@@ -72,6 +66,7 @@ public class DBHelper extends SQLiteOpenHelper {
         insertContact("hoc", "EDUCATION", "2016-5-24", true, "200 days");
         insertContact("an", "OTHER", "2016-5-25", true, "300 days");
         insertContact("ngu", "LIFE", "2016-5-26", false, "100 days");
+        insertContact("choi", "LIFE", "2016-5-26", false, "100 days");
     }
 
     public int getNumberOfEvents(){

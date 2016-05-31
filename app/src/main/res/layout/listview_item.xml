@@ -1,30 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:id="@+id/lstItemHolder"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/lstItemHolder">
+    android:orientation="horizontal"
+    android:padding="@dimen/activity_horizontal_margin">
+
     <ImageView
+        android:id="@+id/lstItemImage"
         android:layout_width="30dip"
         android:layout_height="30dip"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:id="@+id/lstItemImage"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/star"/>
-    <TextView
-        android:layout_marginLeft="30dip"
-        android:layout_marginStart="30dip"
+        android:contentDescription="image"
+        android:src="@drawable/star" />
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/red"
-        android:id="@+id/lstItemName"/>
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:textColor="@color/white"
-        android:layout_centerVertical="true"
-        android:id="@+id/lstItemCount"/>
+        android:layout_marginLeft="45dip"
+        android:layout_marginStart="45dip"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/lstItemName"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/list_view_item_margin"
+            android:layout_marginRight="@dimen/list_view_item_margin"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:textSize="@dimen/list_view_item_text_size_name"/>
+
+        <TextView
+            android:id="@+id/lstItemCount"
+            android:layout_marginRight="@dimen/list_view_item_margin"
+            android:layout_marginEnd="@dimen/list_view_item_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:textSize="@dimen/list_view_item_text_size_count"/>
+    </LinearLayout>
 </RelativeLayout>
