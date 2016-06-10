@@ -1,5 +1,7 @@
 package fukie.afterall;
 
+import java.util.Map;
+
 /**
  * Created by Fukie on 27/05/2016.
  */
@@ -16,6 +18,8 @@ public class Constant {
     }
 
     public static int getEventTypeId(String eventType) {
-        return EventType.valueOf(eventType).ordinal() + 1;
+        return EventType.valueOf(eventType.toUpperCase()).ordinal() + 1;
     }
+
+
 }

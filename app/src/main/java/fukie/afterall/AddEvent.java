@@ -2,7 +2,6 @@ package fukie.afterall;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -63,14 +62,18 @@ public class AddEvent extends AppCompatActivity {
     public void submitAddEvent(View target) throws Exception{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         if(txtName.getText().toString().length() > 0
-                && txtDate.getText().toString().length() >0
-                && txtType.getText().toString().length() >0)
-        dbHelper.insertContact(txtName.getText().toString(),
-                txtType.getText().toString(),
-                txtDate.getText().toString(),
-                chckLoop.isChecked(),
-                "100days");
-        Intent intent = new Intent(AddEvent.this, MainActivity.class);
-        startActivity(intent);
+                && txtType.getText().toString().length() >0) {
+            int loop = 0;
+            if (chckLoop.isChecked()) {
+                loop = 1;
+            }
+            dbHelper.insertEvent(txtName.getText().toString(),
+                    1,
+                    "2016-12-11",
+                    loop,
+                    "100days");
+            Intent intent = new Intent(AddEvent.this, MainActivity.class);
+            startActivity(intent);
+        }
     }
 }
