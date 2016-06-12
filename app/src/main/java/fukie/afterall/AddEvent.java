@@ -16,7 +16,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class AddEvent extends AppCompatActivity {
-    DBHelper dbHelper = new DBHelper(this);
+    DatabaseProcess databaseProcess = new DatabaseProcess(this);
     EditText txtName;
     EditText txtDate;
     EditText txtType;
@@ -67,7 +67,7 @@ public class AddEvent extends AppCompatActivity {
             if (chckLoop.isChecked()) {
                 loop = 1;
             }
-            dbHelper.insertEvent(txtName.getText().toString(),
+            databaseProcess.insertEvent(txtName.getText().toString(),
                     1,
                     "2016-12-11",
                     loop,

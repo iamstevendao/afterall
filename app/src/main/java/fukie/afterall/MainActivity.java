@@ -5,36 +5,29 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     // TextView txtHello;
-    DBHelper dbHelper;
+    DatabaseProcess databaseProcess;
     ListView lstEvent;
 
     static Context context;
 
-    final String PREFS_NAME = "MyPrefsFile";
     SharedPreferences sharedPreferences;
 
     public enum AppStart {
@@ -52,13 +45,13 @@ public class MainActivity extends AppCompatActivity {
 
         lstEvent = (ListView) findViewById(R.id.lstEvent);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        dbHelper = new DBHelper(this);
-        // dbHelper.dropTable();
+        databaseProcess = new DatabaseProcess(this);
+        // databaseProcess.dropTable();
         switch (checkAppStart()) {
             case NORMAL:
-//                dbHelper.deleteAllItems();
+                //databaseProcess.deleteAllItems();
 //                try {
-//                    dbHelper.addExample();
+//                    databaseProcess.addExample();
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
@@ -68,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case FIRST_TIME:
                 try {
-                    dbHelper.addExample();
+                    databaseProcess.initializeFirstTime();
+                    databaseProcess.addExample();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -78,11 +72,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        List<ListViewItem> listViewItems = dbHelper.getAllEvent();
-        ListViewItem[] listViewItems1 = new ListViewItem[listViewItems.size()];
-        listViewItems.toArray(listViewItems1);
-        CustomAdapter customAdapter = new CustomAdapter(this, listViewItems1);
+        List<Events> listViewItems = databaseProcess.getAllEvent();
+        CustomAdapter customAdapter = new CustomAdapter(this, listViewItems);
         lstEvent.setAdapter(customAdapter);
+
+        //Toast.makeText(context, databaseProcess.xxx(), Toast.LENGTH_LONG).show();
     }
 
 
@@ -91,51 +85,26 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public static class ListViewItem {
-        private String eventName;
-        private int dateCount;
-        private int type;
-
-        public ListViewItem(String eventName, int dateCount, int type) {
-            this.eventName = eventName;
-            this.dateCount = dateCount;
-            this.type = type;
-        }
-
-        public String getEventName() {
-            return eventName;
-        }
-
-        public int getType() {
-            return type;
-        }
-
-        public int getDateCount() {
-            return dateCount;
-        }
-    }
-
     public class CustomAdapter extends BaseAdapter {
 
-        private ListViewItem[] objects;
+        private List<Events> objects;
 
         private Context mContext;
 
-        public CustomAdapter(Context context, ListViewItem[] cur) {
+        public CustomAdapter(Context context, List<Events> cur) {
             super();
             mContext = context;
             objects = cur;
         }
 
         public int getCount() {
-            return objects.length;
+            return objects.size();
         }
 
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ListViewItem listViewItem = objects[position];
-            int listViewItemType = getItemViewType(position);
+            Events listViewItem = objects.get(position);
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.listview_item, null);
 
@@ -143,31 +112,34 @@ public class MainActivity extends AppCompatActivity {
             TextView lstItemCount = (TextView) convertView.findViewById(R.id.lstItemCount);
             ImageView lstItemImage = (ImageView) convertView.findViewById(R.id.lstItemImage);
             RelativeLayout lstItemHolder = (RelativeLayout) convertView.findViewById(R.id.lstItemHolder);
-            //   if (convertView == null) {
-
-            switch (listViewItemType) {
-                case Constant.EVENT_ANNIVERSARY:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.pink_transparent));
+            switch (listViewItem.getColor()) {
+                case Constant.COLOR_PINK:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.pink_transparent));
                     break;
-                case Constant.EVENT_EDUCATION:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.blue_transparent));
+                case Constant.COLOR_RED:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.red_transparent));
                     break;
-                case Constant.EVENT_JOB:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.red_transparent));
+                case Constant.COLOR_BLUE:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.blue_transparent));
                     break;
-                case Constant.EVENT_LIFE:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.green_transparent));
+                case Constant.COLOR_GREEN:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.green_transparent));
                     break;
-                case Constant.EVENT_TRIP:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.yellow_transparent));
+                case Constant.COLOR_YELLOW:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow_transparent));
                     break;
-                case Constant.EVENT_OTHER:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray_transparent));
+                case Constant.COLOR_BROWN:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.brown_transparent));
+                    break;
+                case Constant.COLOR_GRAY:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.gray_transparent));
+                    break;
+                case Constant.COLOR_BLACK:
+                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.black_transparent));
                     break;
             }
-            //      }
-            lstItemName.setText(listViewItem.eventName);
-            lstItemCount.setText(String.valueOf(listViewItem.dateCount));
+            lstItemName.setText(listViewItem.getName());
+            lstItemCount.setText(String.valueOf(listViewItem.getDate()));
             return convertView;
         }
 

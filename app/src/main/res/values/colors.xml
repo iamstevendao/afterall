@@ -28,5 +28,6 @@
     <color name="yellow_transparent">#CC808000</color>
     <color name="gray_transparent">#CC808080</color>
     <color name="red_transparent">#CC800000</color>
+    <color name="brown_transparent">#CC8D6E63</color>
     <color name="edittext_background">#f44336</color>
 </resources>
