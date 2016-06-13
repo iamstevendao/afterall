@@ -40,9 +40,10 @@ public class Events {
             Calendar c= Calendar.getInstance();
             c.setTime(dateOfEvent);
             while(today.after(c.getTime())){
-                c.setTime(dateOfEvent);
+               // c.setTime(dateOfEvent);
                 c.add(Calendar.YEAR, 1);
             }
+            date = c.getTime().toString();
             long diff = c.getTime().getTime() - today.getTime();
             diffDays = (int) (diff / (60 * 60 * 1000 * 24));
         } else {

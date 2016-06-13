@@ -18,23 +18,13 @@ import java.util.Locale;
  * Created by Fukie on 23/05/2016.
  */
 public class DatabaseProcess {
-    public static final String DATABASE_NAME = "afterAll.db";
-    public static final String EVENT_TABLE_NAME = "event";
-    public static final String KIND_TABLE_NAME = "kind";
-    public static final String EVENT_COLUMN_ID = "event_id";
-    public static final String EVENT_COLUMN_NAME = "event_name";
-    public static final String KIND_COLUMN_ID = "kind_id";
-    public static final String KIND_COLUMN_NAME = "kind_name";
-    public static final String KIND_COLUMN_COLOR = "kind_color";
-    public static final String EVENT_COLUMN_DATE = "event_date";
-    public static final String EVENT_COLUMN_LOOP = "event_loop";
-    public static final String EVENT_COLUMN_MEMORY = "event_memory";
+
     Context context;
     SQLiteDatabase db;
 
     public DatabaseProcess(Context context) {
         this.context = context;
-        this.db = context.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
+        this.db = context.openOrCreateDatabase(Constant.DATABASE_NAME, Context.MODE_PRIVATE, null);
         db.execSQL(
                 "create table if not exists event" +
                         "(event_id integer primary key autoincrement, event_name text, " +
@@ -80,6 +70,12 @@ public class DatabaseProcess {
         insertEvent("choi", 4, "2016-5-26", 0, "100 days");
     }
 
+    public Cursor query(String query) {
+        Cursor res = db.rawQuery(query, null);
+        res.moveToFirst();
+        return res;
+    }
+
     public List<Events> getAllEvent() {
         List<Events> events = new ArrayList<>();
         Cursor res = db.rawQuery("select * from event natural join kind", null);
@@ -94,11 +90,11 @@ public class DatabaseProcess {
                 // int kind = res.getInt(res.getColumnIndex(KIND_COLUMN_ID));
 
                 Events event = new Events(
-                        res.getString(res.getColumnIndex(EVENT_COLUMN_NAME))
-                        , res.getInt(res.getColumnIndex(KIND_COLUMN_ID))
-                        , res.getInt(res.getColumnIndex(KIND_COLUMN_COLOR))
-                        , res.getString(res.getColumnIndex(EVENT_COLUMN_DATE))
-                        , res.getInt(res.getColumnIndex(EVENT_COLUMN_LOOP)) == 1
+                        res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_NAME))
+                        , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_ID))
+                        , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_COLOR))
+                        , res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_DATE))
+                        , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_LOOP)) == 1
                         , "default");
                 events.add(event);
                 res.moveToNext();

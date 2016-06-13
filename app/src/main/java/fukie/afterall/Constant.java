@@ -21,4 +21,15 @@ public class Constant {
     public static final int COLOR_BROWN = 6;
     public static final int COLOR_GRAY = 7;
     public static final int COLOR_BLACK = 8;
-}
+
+    public static final String DATABASE_NAME = "afterAll.db";
+    public static final String EVENT_TABLE_NAME = "event";
+    public static final String KIND_TABLE_NAME = "kind";
+    public static final String EVENT_COLUMN_ID = "event_id";
+    public static final String EVENT_COLUMN_NAME = "event_name";
+    public static final String KIND_COLUMN_ID = "kind_id";
+    public static final String KIND_COLUMN_NAME = "kind_name";
+    public static final String KIND_COLUMN_COLOR = "kind_color";
+    public static final String EVENT_COLUMN_DATE = "event_date";
+    public static final String EVENT_COLUMN_LOOP = "event_loop";
+    public static final String EVENT_COLUMN_MEMORY = "event_memory";}

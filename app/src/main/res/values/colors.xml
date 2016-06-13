@@ -22,12 +22,12 @@
     <color name="background_all">#f5f5f5</color>
     <color name="transparent">#00000000</color>
     <color name="black_transparent">#4D000000</color>
-    <color name="pink_transparent">#CCFF4081</color>
-    <color name="blue_transparent">#CC000080</color>
-    <color name="green_transparent">#CC008000</color>
-    <color name="yellow_transparent">#CC808000</color>
-    <color name="gray_transparent">#CC808080</color>
-    <color name="red_transparent">#CC800000</color>
-    <color name="brown_transparent">#CC8D6E63</color>
+    <color name="pink_transparent">#4DFF4081</color>
+    <color name="blue_transparent">#4D000080</color>
+    <color name="green_transparent">#4D008000</color>
+    <color name="yellow_transparent">#4D808000</color>
+    <color name="gray_transparent">#4D808080</color>
+    <color name="red_transparent">#4D800000</color>
+    <color name="brown_transparent">#4D8D6E63</color>
     <color name="edittext_background">#f44336</color>
 </resources>

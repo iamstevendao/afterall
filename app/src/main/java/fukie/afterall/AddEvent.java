@@ -2,6 +2,7 @@ package fukie.afterall;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,7 +21,7 @@ public class AddEvent extends AppCompatActivity {
     DatabaseProcess databaseProcess;
     EditText txtName;
     EditText txtDate;
-    EditText txtType;
+    Spinner spinner;
     RadioGroup rdMemory;
     RadioButton rd100;
     RadioButton rdYear;
@@ -33,12 +35,16 @@ public class AddEvent extends AppCompatActivity {
         databaseProcess = new DatabaseProcess(MainActivity.context);
         txtName = (EditText) findViewById(R.id.txtName);
         txtDate = (EditText) findViewById(R.id.txtDate);
-        txtType = (EditText) findViewById(R.id.txtType);
+        spinner = (Spinner) findViewById(R.id.spinnerKind);
         rdMemory = (RadioGroup) findViewById(R.id.rdMemory);
         rd100 = (RadioButton) findViewById(R.id.rd100);
         rdYear = (RadioButton) findViewById(R.id.rdYear);
         rdMonth = (RadioButton) findViewById(R.id.rdMonth);
         chckLoop = (CheckBox) findViewById(R.id.chckLoop);
+
+        Cursor cur = databaseProcess.query("select * from kind order by kind_id");
+        SpinnerAdapter spinnerAdapter = new SpinnerAdapter(MainActivity.context, cur);
+        spinner.setAdapter(spinnerAdapter);
 
         txtDate.setOnClickListener(new View.OnClickListener() {
 
@@ -58,7 +64,7 @@ public class AddEvent extends AppCompatActivity {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"
                                 , Locale.getDefault());
                         Calendar newDate = Calendar.getInstance();
-                        newDate.set(selectedYear, selectedMonth, selectedMonth);
+                        newDate.set(selectedYear, selectedMonth, selectedDay);
                         txtDate.setText(sdf.format(newDate.getTime()));
                     }
                 }, mYear, mMonth, mDay);
@@ -70,14 +76,13 @@ public class AddEvent extends AppCompatActivity {
 
     public void submitAddEvent(View target) throws Exception {
         if (txtName.getText().toString().length() > 0
-                && txtType.getText().toString().length() > 0
                 && txtDate.getText().toString().length() > 0) {
             int loop = 0;
             if (chckLoop.isChecked()) {
                 loop = 1;
             }
             databaseProcess.insertEvent(txtName.getText().toString(),
-                    1,
+                    spinner.getSelectedItemPosition() + 1,
                     txtDate.getText().toString(),
                     loop,
                     "100days");
