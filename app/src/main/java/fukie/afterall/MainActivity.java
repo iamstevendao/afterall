@@ -42,10 +42,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplication().getApplicationContext();
-
         lstEvent = (ListView) findViewById(R.id.lstEvent);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        databaseProcess = new DatabaseProcess(this);
+        databaseProcess = new DatabaseProcess(context);
         // databaseProcess.dropTable();
         switch (checkAppStart()) {
             case NORMAL:
@@ -85,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
     public class CustomAdapter extends BaseAdapter {
 
         private List<Events> objects;
@@ -102,44 +102,87 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        private class ViewHolder {
+            TextView txtName;
+            TextView txtCount;
+            ImageView imgEvent;
+            RelativeLayout layoutBackground;
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             Events listViewItem = objects.get(position);
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.listview_item, null);
-
-            TextView lstItemName = (TextView) convertView.findViewById(R.id.lstItemName);
-            TextView lstItemCount = (TextView) convertView.findViewById(R.id.lstItemCount);
-            ImageView lstItemImage = (ImageView) convertView.findViewById(R.id.lstItemImage);
-            RelativeLayout lstItemHolder = (RelativeLayout) convertView.findViewById(R.id.lstItemHolder);
+            ViewHolder viewHolder;
+            if(convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(R.layout.listview_item, null);
+                viewHolder = new ViewHolder();
+                viewHolder.txtName = (TextView) convertView.findViewById(R.id.lstItemName);
+                viewHolder.txtCount = (TextView) convertView.findViewById(R.id.lstItemCount);
+                viewHolder.imgEvent = (ImageView) convertView.findViewById(R.id.lstItemImage);
+                viewHolder.layoutBackground = (RelativeLayout)
+                        convertView.findViewById(R.id.lstItemHolder);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
             switch (listViewItem.getColor()) {
                 case Constant.COLOR_PINK:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.pink_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.pink_transparent));
                     break;
                 case Constant.COLOR_RED:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.red_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.red_transparent));
                     break;
                 case Constant.COLOR_BLUE:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.blue_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.blue_transparent));
                     break;
                 case Constant.COLOR_GREEN:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.green_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.green_transparent));
                     break;
                 case Constant.COLOR_YELLOW:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.yellow_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.yellow_transparent));
                     break;
                 case Constant.COLOR_BROWN:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.brown_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.brown_transparent));
                     break;
                 case Constant.COLOR_GRAY:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.gray_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.gray_transparent));
                     break;
                 case Constant.COLOR_BLACK:
-                    lstItemHolder.setBackgroundColor(ContextCompat.getColor(context, R.color.black_transparent));
+                    viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(context
+                            , R.color.black_transparent));
                     break;
             }
-            lstItemName.setText(listViewItem.getName());
-            lstItemCount.setText(String.valueOf(listViewItem.getDate()));
+
+            switch (listViewItem.getKind()){
+                case Constant.EVENT_ANNIVERSARY:
+                    viewHolder.imgEvent.setImageResource(R.drawable.anniversary);
+                    break;
+                case Constant.EVENT_EDUCATION:
+                    viewHolder.imgEvent.setImageResource(R.drawable.education);
+                    break;
+                case Constant.EVENT_JOB:
+                    viewHolder.imgEvent.setImageResource(R.drawable.job);
+                    break;
+                case Constant.EVENT_LIFE:
+                    viewHolder.imgEvent.setImageResource(R.drawable.life);
+                    break;
+                case Constant.EVENT_TRIP:
+                    viewHolder.imgEvent.setImageResource(R.drawable.trip);
+                    break;
+                default:
+                    viewHolder.imgEvent.setImageResource(R.drawable.other);
+                    break;
+            }
+            viewHolder.txtName.setText(listViewItem.getName());
+            viewHolder.txtCount.setText(String.valueOf(listViewItem.getDiff()));
+
             return convertView;
         }
 
