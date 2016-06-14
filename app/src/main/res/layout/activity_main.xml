@@ -10,17 +10,17 @@
     android:orientation="vertical"
     tools:context="fukie.afterall.MainActivity">
 
-    <ListView
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:id="@+id/lstEvent"
-        android:scrollbars="vertical"/>
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="add Event"
         android:id="@+id/bttnAddEvent"
         android:onClick="addEvent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lstEvent"
+        android:scrollbars="vertical"/>
+
 </LinearLayout>

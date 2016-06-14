@@ -8,8 +8,10 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     // TextView txtHello;
     DatabaseProcess databaseProcess;
-    ListView lstEvent;
+    RecyclerView lstEvent;
 
     static Context context;
 
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplication().getApplicationContext();
-        lstEvent = (ListView) findViewById(R.id.lstEvent);
+        lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         databaseProcess = new DatabaseProcess(context);
         // databaseProcess.dropTable();
@@ -65,8 +67,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         List<Events> listViewItems = databaseProcess.getAllEvent();
-        ListViewAdapter listViewAdapter = new ListViewAdapter(this, listViewItems);
-        lstEvent.setAdapter(listViewAdapter);
+        EventAdapter eventAdapter = new EventAdapter(this, listViewItems);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        lstEvent.setHasFixedSize(true);
+        lstEvent.setLayoutManager(mLayoutManager);
+        lstEvent.setItemAnimator(new DefaultItemAnimator());
+        lstEvent.setAdapter(eventAdapter);
 
         //Toast.makeText(context, databaseProcess.xxx(), Toast.LENGTH_LONG).show();
     }

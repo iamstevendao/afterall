@@ -1,7 +1,9 @@
 package fukie.afterall;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,46 +17,34 @@ import java.util.List;
 /**
  * Created by Fukie on 13/06/2016.
  */
-public class ListViewAdapter extends BaseAdapter {
+public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private List<Events> objects;
-
     private Context mContext;
 
-    public ListViewAdapter(Context context, List<Events> cur) {
-        super();
+    public EventAdapter(Context context, List<Events> cur) {
         mContext = context;
         objects = cur;
     }
 
-    public int getCount() {
-        return objects.size();
-    }
-
-
-    private class ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder{
         TextView txtName;
         TextView txtCount;
         ImageView imgEvent;
         RelativeLayout layoutBackground;
+
+        public ViewHolder(View v){
+            super(v);
+            this.txtName = (TextView) v.findViewById(R.id.lstItemName);
+            this.txtCount = (TextView) v.findViewById(R.id.lstItemCount);
+            this.imgEvent = (ImageView) v.findViewById(R.id.lstItemImage);
+            this.layoutBackground = (RelativeLayout) v.findViewById(R.id.lstItemHolder);
+        }
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Events listViewItem = objects.get(position);
-        ViewHolder viewHolder;
-        if(convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.listview_item, null);
-            viewHolder = new ViewHolder();
-            viewHolder.txtName = (TextView) convertView.findViewById(R.id.lstItemName);
-            viewHolder.txtCount = (TextView) convertView.findViewById(R.id.lstItemCount);
-            viewHolder.imgEvent = (ImageView) convertView.findViewById(R.id.lstItemImage);
-            viewHolder.layoutBackground = (RelativeLayout)
-                    convertView.findViewById(R.id.lstItemHolder);
-            convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) convertView.getTag();
-        }
         switch (listViewItem.getColor()) {
             case Constant.COLOR_PINK:
                 viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
@@ -112,18 +102,36 @@ public class ListViewAdapter extends BaseAdapter {
         }
         viewHolder.txtName.setText(listViewItem.getName());
         viewHolder.txtCount.setText(String.valueOf(listViewItem.getDiff()));
+    }
+//
+//    @Override
+//    public View getView(int position, View convertView, ViewGroup parent) {
+//        Events listViewItem = objects.get(position);
+//        ViewHolder viewHolder;
+//        if(convertView == null) {
+//            convertView = LayoutInflater.from(mContext).inflate
+//                    (R.layout.listview_item, parent, false);
+//            viewHolder = new ViewHolder(convertView);
+//            convertView.setTag(viewHolder);
+//        } else {
+//            viewHolder = (ViewHolder) convertView.getTag();
+//        }
+//
+//
+//        return convertView;
+//    }
 
-        return convertView;
+    @Override
+    public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.listview_item, parent, false);
+        return new ViewHolder(v);
     }
 
-    public Object getItem(int position) {
-        // TODO Auto-generated method stub
-        return position;
-    }
-
-    public long getItemId(int position) {
-        // TODO Auto-generated method stub
-        return position;
+    @Override
+    public int getItemCount() {
+        return objects.size();
     }
 
 }
