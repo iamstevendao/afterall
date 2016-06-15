@@ -1,4 +1,4 @@
-package fukie.afterall;
+package fukie.afterall.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,12 +14,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alexvasilkov.foldablelayout.UnfoldableView;
+
 import java.util.List;
+
+import fukie.afterall.DatabaseProcess;
+import fukie.afterall.Events;
+import fukie.afterall.R;
+import fukie.afterall.items.EventAdapter;
 
 public class MainActivity extends AppCompatActivity {
     // TextView txtHello;
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
+
+    private View listTouchInterceptor;
+    private View detailsLayout;
+    private UnfoldableView unfoldableView;
 
     static Context context;
 
@@ -37,8 +48,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplication().getApplicationContext();
-        lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
+        listTouchInterceptor = findViewById(R.id.touch_interceptor_view);
+        listTouchInterceptor.setClickable(false);
+
+        detailsLayout = findViewById(R.id.details_layout);
+        detailsLayout.setVisibility(View.INVISIBLE);
+
+        unfoldableView = (UnfoldableView) findViewById(R.id.unfoldable_view);
+
         databaseProcess = new DatabaseProcess(context);
         // databaseProcess.dropTable();
         switch (checkAppStart()) {
@@ -66,6 +86,30 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
+        unfoldableView.setOnFoldingListener(new UnfoldableView.SimpleFoldingListener() {
+            @Override
+            public void onUnfolding(UnfoldableView unfoldableView) {
+                listTouchInterceptor.setClickable(true);
+                detailsLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onUnfolded(UnfoldableView unfoldableView) {
+                listTouchInterceptor.setClickable(false);
+            }
+
+            @Override
+            public void onFoldingBack(UnfoldableView unfoldableView) {
+                listTouchInterceptor.setClickable(true);
+            }
+
+            @Override
+            public void onFoldedBack(UnfoldableView unfoldableView) {
+                listTouchInterceptor.setClickable(false);
+                detailsLayout.setVisibility(View.INVISIBLE);
+            }
+        });
+
         List<Events> listViewItems = databaseProcess.getAllEvent();
         EventAdapter eventAdapter = new EventAdapter(this, listViewItems);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -77,9 +121,18 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(context, databaseProcess.xxx(), Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (unfoldableView != null
+                && (unfoldableView.isUnfolded() || unfoldableView.isUnfolding())) {
+            unfoldableView.foldBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     public void addEvent(View target) {
-        Intent intent = new Intent(MainActivity.this, AddEvent.class);
+        Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
         startActivity(intent);
     }
 

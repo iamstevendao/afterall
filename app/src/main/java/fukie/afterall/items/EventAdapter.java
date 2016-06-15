@@ -1,18 +1,20 @@
-package fukie.afterall;
+package fukie.afterall.items;
 
 import android.content.Context;
-import android.media.Image;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
+
+import fukie.afterall.Constant;
+import fukie.afterall.Events;
+import fukie.afterall.R;
 
 /**
  * Created by Fukie on 13/06/2016.

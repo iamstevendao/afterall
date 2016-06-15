@@ -1,4 +1,4 @@
-package fukie.afterall;
+package fukie.afterall.items;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,6 +10,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import fukie.afterall.Constant;
+import fukie.afterall.R;
 
 /**
  * Created by Fukie on 13/06/2016.

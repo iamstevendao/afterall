@@ -1,4 +1,4 @@
-package fukie.afterall;
+package fukie.afterall.activities;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -17,7 +17,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class AddEvent extends AppCompatActivity {
+import fukie.afterall.DatabaseProcess;
+import fukie.afterall.R;
+import fukie.afterall.items.SpinnerAdapter;
+
+public class AddingEventActivity extends AppCompatActivity {
     DatabaseProcess databaseProcess;
     EditText txtName;
     EditText txtDate;
@@ -56,7 +60,7 @@ public class AddEvent extends AppCompatActivity {
                 int mMonth = mCurrentDate.get(Calendar.MONTH);
                 int mDay = mCurrentDate.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog mDatePicker = new DatePickerDialog(AddEvent.this
+                DatePickerDialog mDatePicker = new DatePickerDialog(AddingEventActivity.this
                         , new DatePickerDialog.OnDateSetListener() {
                     public void onDateSet(DatePicker datepicker, int selectedYear
                             , int selectedMonth, int selectedDay) {
@@ -86,7 +90,7 @@ public class AddEvent extends AppCompatActivity {
                     txtDate.getText().toString(),
                     loop,
                     "100days");
-            Intent intent = new Intent(AddEvent.this, MainActivity.class);
+            Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
             startActivity(intent);
         }
     }
