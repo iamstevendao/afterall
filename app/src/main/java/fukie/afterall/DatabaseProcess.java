@@ -28,7 +28,8 @@ public class DatabaseProcess {
         db.execSQL(
                 "create table if not exists event" +
                         "(event_id integer primary key autoincrement, event_name text, " +
-                        "kind_id integer, event_date text, event_loop integer, event_memory text);"
+                        "kind_id integer, event_date text, event_loop integer" +
+                        ", event_notification integer, event_image integer);"
         );
         db.execSQL(
                 "create table if not exists kind" +
@@ -56,18 +57,19 @@ public class DatabaseProcess {
                 "VALUES('" + name + "', " + color + ");");
     }
 
-    public void insertEvent(String name, int kind, String date, int loop, String memory) {
-        db.execSQL("INSERT INTO event(event_name, kind_id, event_date, event_loop, event_memory) " +
-                "VALUES('" + name + "', " + kind + ", '" + date + "', "
-                + loop + ", '" + memory + "');");
+    public void insertEvent(String name, int kind, String date, int loop, int memory, int img) {
+        db.execSQL("INSERT INTO event(event_name, kind_id, event_date"
+                + ", event_loop, event_notification, event_image) "
+                + "VALUES('" + name + "', " + kind + ", '" + date + "', "
+                + loop + ", " + memory + ", " + img + ");");
     }
 
     public void addExample() throws Exception {
-        insertEvent("yeu", 1, "2016-5-23", 0, "100 days");
-        insertEvent("hoc", 2, "2016-5-24", 1, "200 days");
-        insertEvent("an", 5, "2016-5-25", 0, "300 days");
-        insertEvent("ngu", 3, "2016-5-26", 1, "100 days");
-        insertEvent("choi", 4, "2016-5-26", 0, "100 days");
+        insertEvent("yeu", 1, "2016-5-23", 0, 0, 7);
+        insertEvent("hoc", 2, "2016-5-24", 1, 0, 8);
+        insertEvent("an", 5, "2016-5-25", 0, 1, 3);
+        insertEvent("ngu", 3, "2016-5-26", 1, 1, 4);
+        insertEvent("choi", 4, "2016-5-26", 0, 0, 5);
     }
 
     public Cursor query(String query) {
@@ -95,7 +97,8 @@ public class DatabaseProcess {
                         , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_COLOR))
                         , res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_DATE))
                         , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_LOOP)) == 1
-                        , "default");
+                        , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_NOTIFICATION)) == 1
+                        , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_IMAGE)));
                 events.add(event);
                 res.moveToNext();
             }

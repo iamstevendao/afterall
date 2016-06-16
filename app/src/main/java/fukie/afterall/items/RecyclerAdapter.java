@@ -1,16 +1,13 @@
 package fukie.afterall.items;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ramotion.foldingcell.FoldingCell;
@@ -36,18 +33,34 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         objects = cur;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView txtName;
-        TextView txtCount;
-        ImageView imgEvent;
-        LinearLayout layoutBackground;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView txtTitleName;
+        TextView txtTitleCount;
+        ImageView imgTitleEvent;
+        LinearLayout countHolder;
 
-        public ViewHolder(View v){
+        TextView txtContentName;
+        TextView txtContentDate;
+        TextView txtContentDiffDate;
+        TextView txtContentCategory;
+        ImageView imgContentEvent;
+        ImageView imgContentLoop;
+        ImageView imgContentNoti;
+
+        public ViewHolder(View v) {
             super(v);
-            this.txtName = (TextView) v.findViewById(R.id.lstItemName);
-            this.txtCount = (TextView) v.findViewById(R.id.lstItemCount);
-            this.imgEvent = (ImageView) v.findViewById(R.id.lstItemImage);
-            this.layoutBackground = (LinearLayout) v.findViewById(R.id.lstItemHolder);
+            this.txtTitleName = (TextView) v.findViewById(R.id.title_txt_name);
+            this.txtTitleCount = (TextView) v.findViewById(R.id.title_txt_count);
+            this.imgTitleEvent = (ImageView) v.findViewById(R.id.title_image_event);
+            this.countHolder = (LinearLayout) v.findViewById(R.id.title_count_holder);
+
+            this.txtContentName = (TextView) v.findViewById(R.id.content_txt_name);
+            this.txtContentDate = (TextView) v.findViewById(R.id.content_txt_date);
+            this.txtContentDiffDate = (TextView) v.findViewById(R.id.content_txt_diff_date);
+            this.txtContentCategory = (TextView) v.findViewById(R.id.content_txt_category);
+            this.imgContentEvent = (ImageView) v.findViewById(R.id.content_img_event);
+            this.imgContentLoop = (ImageView) v.findViewById(R.id.content_img_loop);
+            this.imgContentNoti = (ImageView) v.findViewById(R.id.content_img_noti);
         }
     }
 
@@ -60,64 +73,86 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         } else {
             ((FoldingCell) viewHolder.itemView).fold(true);
         }
-
         switch (listViewItem.getColor()) {
             case Constant.COLOR_PINK:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.pink_transparent));
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
+                        , R.color.colorAccent));
                 break;
             case Constant.COLOR_RED:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.red_transparent));
                 break;
             case Constant.COLOR_BLUE:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.blue_transparent));
                 break;
             case Constant.COLOR_GREEN:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.green_transparent));
                 break;
             case Constant.COLOR_YELLOW:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.yellow_transparent));
                 break;
             case Constant.COLOR_BROWN:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.brown_transparent));
                 break;
             case Constant.COLOR_GRAY:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.gray_transparent));
                 break;
             case Constant.COLOR_BLACK:
-                viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
+                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
                         , R.color.black_transparent));
                 break;
         }
 
-        switch (listViewItem.getKind()){
+        switch (listViewItem.getKind()) {
             case Constant.EVENT_ANNIVERSARY:
-                viewHolder.imgEvent.setImageResource(R.drawable.anniversary);
+               // viewHolder.imgTitleEvent.setImageResource(R.drawable.anniversary);
+                viewHolder.txtContentCategory.setText("ANNIVERSARY");
                 break;
             case Constant.EVENT_EDUCATION:
-                viewHolder.imgEvent.setImageResource(R.drawable.education);
+              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.education);
+                viewHolder.txtContentCategory.setText("EDUCATION");
                 break;
             case Constant.EVENT_JOB:
-                viewHolder.imgEvent.setImageResource(R.drawable.job);
+              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.job);
+                viewHolder.txtContentCategory.setText("JOB");
                 break;
             case Constant.EVENT_LIFE:
-                viewHolder.imgEvent.setImageResource(R.drawable.life);
+               // viewHolder.imgTitleEvent.setImageResource(R.drawable.life);
+                viewHolder.txtContentCategory.setText("LIFE");
                 break;
             case Constant.EVENT_TRIP:
-                viewHolder.imgEvent.setImageResource(R.drawable.trip);
+              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.trip);
+                viewHolder.txtContentCategory.setText("TRIP");
                 break;
             default:
-                viewHolder.imgEvent.setImageResource(R.drawable.other);
+              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.other);
+                viewHolder.txtContentCategory.setText("OTHERS");
                 break;
         }
-        viewHolder.txtName.setText(listViewItem.getName());
-        viewHolder.txtCount.setText(String.valueOf(listViewItem.getDiff()));
+        viewHolder.txtTitleName.setText(listViewItem.getName());
+        viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
+
+        viewHolder.txtContentDate.setText(listViewItem.getDate());
+        viewHolder.txtContentName.setText(listViewItem.getName());
+        try {
+            viewHolder.txtContentDiffDate.setText(listViewItem.getDiffString());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        int imageResource = mContext.getResources()
+                .getIdentifier(listViewItem.getImageUri(), null, mContext.getPackageName());
+        viewHolder.imgTitleEvent.setImageResource(imageResource);
+        viewHolder.imgContentEvent.setImageResource(imageResource);
+        if(listViewItem.isLoop())
+            viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
+        if(listViewItem.isNotification())
+            viewHolder.imgContentNoti.setImageResource(R.drawable.img_true);
+
     }
 
     @Override

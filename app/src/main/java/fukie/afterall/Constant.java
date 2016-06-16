@@ -32,4 +32,6 @@ public class Constant {
     public static final String KIND_COLUMN_COLOR = "kind_color";
     public static final String EVENT_COLUMN_DATE = "event_date";
     public static final String EVENT_COLUMN_LOOP = "event_loop";
-    public static final String EVENT_COLUMN_MEMORY = "event_memory";}
+    public static final String EVENT_COLUMN_NOTIFICATION = "event_notification";
+    public static final String EVENT_COLUMN_IMAGE = "event_image";
+}

@@ -89,7 +89,8 @@ public class AddingEventActivity extends AppCompatActivity {
                     spinner.getSelectedItemPosition() + 1,
                     txtDate.getText().toString(),
                     loop,
-                    "100days");
+                    0,
+                    2);
             Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
             startActivity(intent);
         }

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -22,6 +23,7 @@ import java.util.List;
 import fukie.afterall.DatabaseProcess;
 import fukie.afterall.Events;
 import fukie.afterall.R;
+import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 
@@ -82,9 +84,12 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         lstEvent.setLayoutManager(mLayoutManager);
         lstEvent.setItemAnimator(new DefaultItemAnimator());
+        lstEvent.addItemDecoration(
+                new DividerItemDecoration(ContextCompat.getDrawable(this, R.drawable.divider)));
         lstEvent.setAdapter(recyclerAdapter);
         lstEvent.addOnItemTouchListener(
-                new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
+                new RecyclerItemClickListener(context
+                        , new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         // do whatever
                         ((FoldingCell) view).toggle(false);
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
         );
+
     }
 
 

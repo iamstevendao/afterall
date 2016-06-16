@@ -16,5 +16,5 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
-        android:textSize="@dimen/list_view_item_text_size_name"/>
+        android:textSize="@dimen/size_text_name"/>
 </LinearLayout>

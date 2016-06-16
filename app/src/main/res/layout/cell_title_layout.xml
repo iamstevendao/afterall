@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/activity_horizontal_margin">
+    android:layout_height="155dp"
+    android:orientation="horizontal">
 
     <FrameLayout
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:padding="4dp">
+        android:layout_height="match_parent">
         <ImageView
-            android:id="@+id/lstItemImage"
+            android:id="@+id/title_image_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="image"
             android:scaleType="centerCrop"
-            android:src="@drawable/star" />
+            android:src="@drawable/bg1" />
         <View
             android:layout_width="match_parent"
             android:layout_height="40sp"
@@ -24,24 +22,24 @@
             android:background="@drawable/image_text_shadow" />
 
         <TextView
-            android:id="@+id/lstItemName"
+            android:id="@+id/title_txt_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:textColor="@color/white"
-            android:textSize="@dimen/list_view_item_text_size_name" />
+            android:textSize="@dimen/size_text_count" />
     </FrameLayout>
 
     <LinearLayout
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:id="@+id/lstItemHolder">
+        android:id="@+id/title_count_holder">
         <TextView
-            android:id="@+id/lstItemCount"
+            android:id="@+id/title_txt_count"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:textColor="@color/white"
-            android:textSize="@dimen/list_view_item_text_size_count" />
+            android:textSize="@dimen/size_text_count" />
     </LinearLayout>
 </LinearLayout>
