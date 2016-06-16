@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:padding="4dp">
+        <ImageView
+            android:id="@+id/lstItemImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="image"
+            android:scaleType="centerCrop"
+            android:src="@drawable/star" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40sp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/image_text_shadow" />
+
+        <TextView
+            android:id="@+id/lstItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:textColor="@color/white"
+            android:textSize="@dimen/list_view_item_text_size_name" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:id="@+id/lstItemHolder">
+        <TextView
+            android:id="@+id/lstItemCount"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:textSize="@dimen/list_view_item_text_size_count" />
+    </LinearLayout>
+</LinearLayout>

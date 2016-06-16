@@ -14,23 +14,21 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alexvasilkov.foldablelayout.UnfoldableView;
+
+import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.List;
 
 import fukie.afterall.DatabaseProcess;
 import fukie.afterall.Events;
 import fukie.afterall.R;
-import fukie.afterall.items.EventAdapter;
+import fukie.afterall.items.RecyclerAdapter;
+import fukie.afterall.items.RecyclerItemClickListener;
 
 public class MainActivity extends AppCompatActivity {
     // TextView txtHello;
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
-
-    private View listTouchInterceptor;
-    private View detailsLayout;
-    private UnfoldableView unfoldableView;
 
     static Context context;
 
@@ -51,16 +49,9 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
-        listTouchInterceptor = findViewById(R.id.touch_interceptor_view);
-        listTouchInterceptor.setClickable(false);
-
-        detailsLayout = findViewById(R.id.details_layout);
-        detailsLayout.setVisibility(View.INVISIBLE);
-
-        unfoldableView = (UnfoldableView) findViewById(R.id.unfoldable_view);
 
         databaseProcess = new DatabaseProcess(context);
-        // databaseProcess.dropTable();
+
         switch (checkAppStart()) {
             case NORMAL:
                 //databaseProcess.deleteAllItems();
@@ -86,50 +77,23 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        unfoldableView.setOnFoldingListener(new UnfoldableView.SimpleFoldingListener() {
-            @Override
-            public void onUnfolding(UnfoldableView unfoldableView) {
-                listTouchInterceptor.setClickable(true);
-                detailsLayout.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onUnfolded(UnfoldableView unfoldableView) {
-                listTouchInterceptor.setClickable(false);
-            }
-
-            @Override
-            public void onFoldingBack(UnfoldableView unfoldableView) {
-                listTouchInterceptor.setClickable(true);
-            }
-
-            @Override
-            public void onFoldedBack(UnfoldableView unfoldableView) {
-                listTouchInterceptor.setClickable(false);
-                detailsLayout.setVisibility(View.INVISIBLE);
-            }
-        });
-
         List<Events> listViewItems = databaseProcess.getAllEvent();
-        EventAdapter eventAdapter = new EventAdapter(this, listViewItems);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        lstEvent.setHasFixedSize(true);
+        final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         lstEvent.setLayoutManager(mLayoutManager);
         lstEvent.setItemAnimator(new DefaultItemAnimator());
-        lstEvent.setAdapter(eventAdapter);
-
-        //Toast.makeText(context, databaseProcess.xxx(), Toast.LENGTH_LONG).show();
+        lstEvent.setAdapter(recyclerAdapter);
+        lstEvent.addOnItemTouchListener(
+                new RecyclerItemClickListener(context, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        // do whatever
+                        ((FoldingCell) view).toggle(false);
+                        recyclerAdapter.registerToggle(position);
+                    }
+                })
+        );
     }
 
-    @Override
-    public void onBackPressed() {
-        if (unfoldableView != null
-                && (unfoldableView.isUnfolded() || unfoldableView.isUnfolding())) {
-            unfoldableView.foldBack();
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     public void addEvent(View target) {
         Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
@@ -147,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
             appStart = checkAppStart(currentVersionCode, lastVersionCode);
 
         } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(context, "Unable to determine current app version from pacakge manager. Defenisvely assuming normal app start.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Unable to determine current app version from pacakge manager."
+                    + " Defenisvely assuming normal app start.", Toast.LENGTH_SHORT).show();
         }
         return appStart;
     }

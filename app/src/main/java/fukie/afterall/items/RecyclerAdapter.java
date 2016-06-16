@@ -1,15 +1,21 @@
 package fukie.afterall.items;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ramotion.foldingcell.FoldingCell;
+
+import java.util.HashSet;
 import java.util.List;
 
 import fukie.afterall.Constant;
@@ -19,34 +25,42 @@ import fukie.afterall.R;
 /**
  * Created by Fukie on 13/06/2016.
  */
-public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
     private List<Events> objects;
     private Context mContext;
+    private HashSet<Integer> unfoldedIndexes = new HashSet<>();
 
-    public EventAdapter(Context context, List<Events> cur) {
+    public RecyclerAdapter(Context context, List<Events> cur) {
         mContext = context;
         objects = cur;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         TextView txtName;
         TextView txtCount;
         ImageView imgEvent;
-        RelativeLayout layoutBackground;
+        LinearLayout layoutBackground;
 
         public ViewHolder(View v){
             super(v);
             this.txtName = (TextView) v.findViewById(R.id.lstItemName);
             this.txtCount = (TextView) v.findViewById(R.id.lstItemCount);
             this.imgEvent = (ImageView) v.findViewById(R.id.lstItemImage);
-            this.layoutBackground = (RelativeLayout) v.findViewById(R.id.lstItemHolder);
+            this.layoutBackground = (LinearLayout) v.findViewById(R.id.lstItemHolder);
         }
     }
+
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Events listViewItem = objects.get(position);
+        if (unfoldedIndexes.contains(position)) {
+            ((FoldingCell) viewHolder.itemView).unfold(true);
+        } else {
+            ((FoldingCell) viewHolder.itemView).fold(true);
+        }
+
         switch (listViewItem.getColor()) {
             case Constant.COLOR_PINK:
                 viewHolder.layoutBackground.setBackgroundColor(ContextCompat.getColor(mContext
@@ -105,29 +119,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         viewHolder.txtName.setText(listViewItem.getName());
         viewHolder.txtCount.setText(String.valueOf(listViewItem.getDiff()));
     }
-//
-//    @Override
-//    public View getView(int position, View convertView, ViewGroup parent) {
-//        Events listViewItem = objects.get(position);
-//        ViewHolder viewHolder;
-//        if(convertView == null) {
-//            convertView = LayoutInflater.from(mContext).inflate
-//                    (R.layout.listview_item, parent, false);
-//            viewHolder = new ViewHolder(convertView);
-//            convertView.setTag(viewHolder);
-//        } else {
-//            viewHolder = (ViewHolder) convertView.getTag();
-//        }
-//
-//
-//        return convertView;
-//    }
 
     @Override
-    public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+    public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.listview_item, parent, false);
+                .inflate(R.layout.cell, parent, false);
         return new ViewHolder(v);
     }
 
@@ -136,4 +132,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         return objects.size();
     }
 
+    public void registerToggle(int position) {
+        if (unfoldedIndexes.contains(position))
+            registerFold(position);
+        else
+            registerUnfold(position);
+    }
+
+    public void registerFold(int position) {
+        unfoldedIndexes.remove(position);
+    }
+
+    public void registerUnfold(int position) {
+        unfoldedIndexes.add(position);
+    }
 }
+
+

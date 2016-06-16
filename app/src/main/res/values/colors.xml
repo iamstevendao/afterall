@@ -30,4 +30,6 @@
     <color name="red_transparent">#4D800000</color>
     <color name="brown_transparent">#4D8D6E63</color>
     <color name="edittext_background">#f44336</color>
+    <color name="bgBackSideColor">#f4f0ff</color>
+
 </resources>
