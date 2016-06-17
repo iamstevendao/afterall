@@ -1,4 +1,4 @@
-package fukie.afterall;
+package fukie.afterall.utils;
 
 import java.util.Map;
 

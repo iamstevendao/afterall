@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import fukie.afterall.DatabaseProcess;
+import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.R;
 import fukie.afterall.items.SpinnerAdapter;
 

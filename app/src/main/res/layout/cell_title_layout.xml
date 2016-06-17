@@ -1,45 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="155dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent">
         <ImageView
             android:id="@+id/title_image_event"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:contentDescription="image"
             android:scaleType="centerCrop"
             android:src="@drawable/bg1" />
         <View
             android:layout_width="match_parent"
-            android:layout_height="40sp"
-            android:layout_gravity="bottom"
+            android:layout_height="60sp"
+            android:layout_alignBottom="@id/title_image_event"
             android:background="@drawable/image_text_shadow" />
 
         <TextView
             android:id="@+id/title_txt_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_alignBottom="@id/title_image_event"
             android:textColor="@color/white"
-            android:textSize="@dimen/size_text_count" />
-    </FrameLayout>
+            android:textSize="@dimen/size_text_name" />
 
     <LinearLayout
+        android:id="@+id/title_count_holder"
         android:layout_width="80dp"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:id="@+id/title_count_holder">
+        android:layout_height="150dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/title_image_event">
         <TextView
             android:id="@+id/title_txt_count"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:textColor="@color/white"
+            android:gravity="center_vertical"
             android:textSize="@dimen/size_text_count" />
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

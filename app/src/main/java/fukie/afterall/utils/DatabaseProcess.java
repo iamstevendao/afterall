@@ -1,16 +1,11 @@
-package fukie.afterall;
+package fukie.afterall.utils;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -65,11 +60,11 @@ public class DatabaseProcess {
     }
 
     public void addExample() throws Exception {
-        insertEvent("yeu", 1, "2016-5-23", 0, 0, 7);
-        insertEvent("hoc", 2, "2016-5-24", 1, 0, 8);
+        insertEvent("yeu", 1, "2016-5-23", 0, 0, 1);
+        insertEvent("hoc", 2, "2016-5-24", 1, 0, 2);
         insertEvent("an", 5, "2016-5-25", 0, 1, 3);
         insertEvent("ngu", 3, "2016-5-26", 1, 1, 4);
-        insertEvent("choi", 4, "2016-5-26", 0, 0, 5);
+        insertEvent("choi", 4, "2016-5-26", 0, 0, 1);
     }
 
     public Cursor query(String query) {
@@ -83,14 +78,7 @@ public class DatabaseProcess {
         Cursor res = db.rawQuery("select * from event natural join kind", null);
         res.moveToFirst();
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             while (!res.isAfterLast()) {
-                //  Date today = new Date();
-                //long diff =  sdf.parse(res.getString(
-                //      res.getColumnIndex(EVENT_COLUMN_DATE))).getTime() - today.getTime();
-                // int diffDays = (int)(diff / (60 * 60 * 1000 * 24));
-                // int kind = res.getInt(res.getColumnIndex(KIND_COLUMN_ID));
-
                 Events event = new Events(
                         res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_NAME))
                         , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_ID))

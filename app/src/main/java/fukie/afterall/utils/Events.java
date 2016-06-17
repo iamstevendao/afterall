@@ -1,4 +1,4 @@
-package fukie.afterall;
+package fukie.afterall.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,14 +36,13 @@ public class Events {
 
     public int getDiffDate() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        int diffDays = 0;
+        int diffDays;
         Date dateOfEvent = sdf.parse(date);
         Date today = new Date();
         if (loop) {
-            Calendar c= Calendar.getInstance();
+            Calendar c = Calendar.getInstance();
             c.setTime(dateOfEvent);
-            while(today.after(c.getTime())){
-               // c.setTime(dateOfEvent);
+            while (today.after(c.getTime())) {
                 c.add(Calendar.YEAR, 1);
             }
             date = c.getTime().toString();
@@ -88,15 +87,15 @@ public class Events {
         now.setTime(new Date());
         event.setTime(sdf.parse(date));
         int diffYear = now.get(Calendar.YEAR) - event.get(Calendar.YEAR);
-        if (now.get(Calendar.MONTH) > event.get(Calendar.MONTH) ||
-                (now.get(Calendar.MONTH) == event.get(Calendar.MONTH)
-                        && now.get(Calendar.DATE) > event.get(Calendar.DATE))) {
+        if (event.get(Calendar.MONTH) > now.get(Calendar.MONTH) ||
+                (event.get(Calendar.MONTH) == now.get(Calendar.MONTH)
+                        && event.get(Calendar.DATE) > now.get(Calendar.DATE))) {
             diffYear--;
         }
         string += String.valueOf(diffYear) + "years ";
         int diffMonth = now.get(Calendar.MONTH) - event.get(Calendar.MONTH);
-        if (now.get(Calendar.MONTH) > event.get(Calendar.MONTH) ||
-                (now.get(Calendar.DATE) == event.get(Calendar.DATE))) {
+        if (event.get(Calendar.MONTH) > now.get(Calendar.MONTH) ||
+                (event.get(Calendar.DATE) == now.get(Calendar.DATE))) {
             diffMonth--;
         }
         string += String.valueOf(diffMonth) + "months ";

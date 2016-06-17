@@ -20,8 +20,8 @@ import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.List;
 
-import fukie.afterall.DatabaseProcess;
-import fukie.afterall.Events;
+import fukie.afterall.utils.DatabaseProcess;
+import fukie.afterall.utils.Events;
 import fukie.afterall.R;
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.RecyclerAdapter;

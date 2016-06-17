@@ -1,6 +1,8 @@
 package fukie.afterall.items;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,8 +17,9 @@ import com.ramotion.foldingcell.FoldingCell;
 import java.util.HashSet;
 import java.util.List;
 
-import fukie.afterall.Constant;
-import fukie.afterall.Events;
+import fukie.afterall.utils.BitmapBlur;
+import fukie.afterall.utils.Constant;
+import fukie.afterall.utils.Events;
 import fukie.afterall.R;
 
 /**
@@ -146,7 +149,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
         int imageResource = mContext.getResources()
                 .getIdentifier(listViewItem.getImageUri(), null, mContext.getPackageName());
-        viewHolder.imgTitleEvent.setImageResource(imageResource);
+        //viewHolder.imgTitleEvent.setImageResource(imageResource);
+        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), imageResource);
+        Bitmap blurred = BitmapBlur.blurRenderScript(mContext, bitmap, 10);
+//second parametre is radius
+        viewHolder.imgTitleEvent.setImageBitmap(blurred);
         viewHolder.imgContentEvent.setImageResource(imageResource);
         if(listViewItem.isLoop())
             viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);

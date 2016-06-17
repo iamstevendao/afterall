@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import fukie.afterall.Constant;
+import fukie.afterall.utils.Constant;
 import fukie.afterall.R;
 
 /**
