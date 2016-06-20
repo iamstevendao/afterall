@@ -18,9 +18,8 @@ public class Constant {
     public static final int COLOR_BLUE = 3;
     public static final int COLOR_GREEN = 4;
     public static final int COLOR_YELLOW = 5;
-    public static final int COLOR_BROWN = 6;
     public static final int COLOR_GRAY = 7;
-    public static final int COLOR_BLACK = 8;
+    public static final int COLOR_BLACK = 6;
 
     public static final String DATABASE_NAME = "afterAll.db";
     public static final String EVENT_TABLE_NAME = "event";

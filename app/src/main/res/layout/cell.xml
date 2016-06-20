@@ -3,10 +3,7 @@
     xmlns:folding-cell="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/folding_cell"
-    folding-cell:animationDuration="1200"
-    folding-cell:additionalFlipsCount="1"
-    folding-cell:backSideColor="@color/pink_transparent">
+    android:id="@+id/folding_cell">
 
     <!-- CONTENT (UNFOLDED) LAYOUT (MUST BE AT LEAST 2x times BIGGER than content layout bellow)-->
     <include layout="@layout/cell_content_layout" />

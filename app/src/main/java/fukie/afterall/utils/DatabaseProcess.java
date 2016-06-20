@@ -60,11 +60,11 @@ public class DatabaseProcess {
     }
 
     public void addExample() throws Exception {
-        insertEvent("yeu", 1, "2016-5-23", 0, 0, 1);
-        insertEvent("hoc", 2, "2016-5-24", 1, 0, 2);
-        insertEvent("an", 5, "2016-5-25", 0, 1, 3);
-        insertEvent("ngu", 3, "2016-5-26", 1, 1, 4);
-        insertEvent("choi", 4, "2016-5-26", 0, 0, 1);
+        insertEvent("Yêu xa nhé!", 1, "2016-5-14", 0, 0, 2);
+        insertEvent("Có!", 1, "2012-01-5", 0, 0, 1);
+        insertEvent("Sinh Nhật Lợn", 5, "1995-02-5", 1, 0, 3);
+        insertEvent("Sinh Nhật Chó", 3, "1995-9-16", 1, 1, 4);
+        insertEvent("choi", 4, "2016-6-20", 0, 0, 1);
     }
 
     public Cursor query(String query) {

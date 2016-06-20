@@ -88,10 +88,6 @@ public class SpinnerAdapter extends BaseAdapter {
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.yellow_transparent));
                 break;
-            case Constant.COLOR_BROWN:
-                viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
-                        , R.color.brown_transparent));
-                break;
             case Constant.COLOR_GRAY:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.gray_transparent));

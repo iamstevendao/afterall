@@ -3,13 +3,13 @@ package fukie.afterall.items;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ramotion.foldingcell.FoldingCell;
@@ -40,7 +40,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         TextView txtTitleName;
         TextView txtTitleCount;
         ImageView imgTitleEvent;
-        LinearLayout countHolder;
+        ImageView imgTitleArrow;
+        View imgTitleBlur;
 
         TextView txtContentName;
         TextView txtContentDate;
@@ -50,12 +51,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         ImageView imgContentLoop;
         ImageView imgContentNoti;
 
-        public ViewHolder(View v) {
+        public ViewHolder(View v, Context context) {
             super(v);
             this.txtTitleName = (TextView) v.findViewById(R.id.title_txt_name);
             this.txtTitleCount = (TextView) v.findViewById(R.id.title_txt_count);
             this.imgTitleEvent = (ImageView) v.findViewById(R.id.title_image_event);
-            this.countHolder = (LinearLayout) v.findViewById(R.id.title_count_holder);
+            this.imgTitleBlur = v.findViewById(R.id.title_view_blur);
+            Typeface face=Typeface.createFromAsset(context.getAssets(), "fonts/MobileSans.ttf");
+            this.txtTitleCount.setTypeface(face);
+            this.imgTitleArrow = (ImageView) v.findViewById(R.id.title_image_arrow);
 
             this.txtContentName = (TextView) v.findViewById(R.id.content_txt_name);
             this.txtContentDate = (TextView) v.findViewById(R.id.content_txt_date);
@@ -78,36 +82,39 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
         switch (listViewItem.getColor()) {
             case Constant.COLOR_PINK:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.colorAccent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.pink_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_pink);
                 break;
             case Constant.COLOR_RED:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.red_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.red_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_red);
                 break;
             case Constant.COLOR_BLUE:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.blue_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.blue_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_blue);
                 break;
             case Constant.COLOR_GREEN:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.green_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.green_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_green);
                 break;
             case Constant.COLOR_YELLOW:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.yellow_transparent));
-                break;
-            case Constant.COLOR_BROWN:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.brown_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.yellow_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_yellow);
                 break;
             case Constant.COLOR_GRAY:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.gray_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.gray_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_gray);
                 break;
             case Constant.COLOR_BLACK:
-                viewHolder.countHolder.setBackgroundColor(ContextCompat.getColor(mContext
-                        , R.color.black_transparent));
+                ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
+                        , R.color.black_transparent), 1);
+                viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_black);
                 break;
         }
 
@@ -138,7 +145,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 break;
         }
         viewHolder.txtTitleName.setText(listViewItem.getName());
-        viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
+
+        if(listViewItem.getDiff() > 0) {
+            viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
+            viewHolder.imgTitleArrow.setImageResource(R.drawable.arrow_right);
+        } else if(listViewItem.getDiff() == 0){
+            viewHolder.imgTitleArrow.setVisibility(View.GONE);
+            viewHolder.txtTitleCount.setText(String.valueOf(0));
+        } else
+            viewHolder.txtTitleCount.setText(String.valueOf(-listViewItem.getDiff()));
 
         viewHolder.txtContentDate.setText(listViewItem.getDate());
         viewHolder.txtContentName.setText(listViewItem.getName());
@@ -149,11 +164,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
         int imageResource = mContext.getResources()
                 .getIdentifier(listViewItem.getImageUri(), null, mContext.getPackageName());
-        //viewHolder.imgTitleEvent.setImageResource(imageResource);
-        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), imageResource);
-        Bitmap blurred = BitmapBlur.blurRenderScript(mContext, bitmap, 10);
-//second parametre is radius
-        viewHolder.imgTitleEvent.setImageBitmap(blurred);
+        viewHolder.imgTitleEvent.setImageResource(imageResource);
         viewHolder.imgContentEvent.setImageResource(imageResource);
         if(listViewItem.isLoop())
             viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
@@ -166,7 +177,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.cell, parent, false);
-        return new ViewHolder(v);
+        return new ViewHolder(v, mContext);
     }
 
     @Override

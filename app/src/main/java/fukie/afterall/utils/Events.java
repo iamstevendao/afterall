@@ -45,7 +45,6 @@ public class Events {
             while (today.after(c.getTime())) {
                 c.add(Calendar.YEAR, 1);
             }
-            date = c.getTime().toString();
             long diff = c.getTime().getTime() - today.getTime();
             diffDays = (int) (diff / (60 * 60 * 1000 * 24));
         } else {

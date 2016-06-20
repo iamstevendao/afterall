@@ -4,39 +4,52 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/title_image_event"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:contentDescription="image"
-            android:scaleType="centerCrop"
-            android:src="@drawable/bg1" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="60sp"
-            android:layout_alignBottom="@id/title_image_event"
-            android:background="@drawable/image_text_shadow" />
+    <ImageView
+        android:id="@+id/title_image_event"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="image"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg4" />
 
-        <TextView
-            android:id="@+id/title_txt_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/title_image_event"
-            android:textColor="@color/white"
-            android:textSize="@dimen/size_text_name" />
+    <View
+        android:id="@+id/title_view_blur"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_alignBottom="@id/title_image_event"
+        android:background="@drawable/blur_pink" />
 
     <LinearLayout
-        android:id="@+id/title_count_holder"
-        android:layout_width="80dp"
-        android:layout_height="150dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@id/title_image_event">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/title_image_arrow"
+            android:layout_width="25dp"
+            android:layout_height="50dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/arrow_left"
+            android:layout_gravity="center_vertical"/>
+
         <TextView
             android:id="@+id/title_txt_count"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="90dp"
+            android:text="hello"
             android:textColor="@color/white"
-            android:gravity="center_vertical"
             android:textSize="@dimen/size_text_count" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/title_txt_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/title_image_event"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:paddingBottom="20dp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/size_text_name" />
+
 </RelativeLayout>
