@@ -9,8 +9,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ramotion.foldingcell.FoldingCell;
 
@@ -49,17 +51,20 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         TextView txtContentCategory;
         ImageView imgContentEvent;
         ImageView imgContentLoop;
-        ImageView imgContentNoti;
+        Button bttnContentModify;
+        Button bttnContentDelete;
 
         public ViewHolder(View v, Context context) {
             super(v);
+            Typeface face=Typeface.createFromAsset(context.getAssets(), "fonts/MobileSans.ttf");
             this.txtTitleName = (TextView) v.findViewById(R.id.title_txt_name);
             this.txtTitleCount = (TextView) v.findViewById(R.id.title_txt_count);
+            this.txtTitleCount.setTypeface(face);
             this.imgTitleEvent = (ImageView) v.findViewById(R.id.title_image_event);
             this.imgTitleBlur = v.findViewById(R.id.title_view_blur);
-            Typeface face=Typeface.createFromAsset(context.getAssets(), "fonts/MobileSans.ttf");
-            this.txtTitleCount.setTypeface(face);
             this.imgTitleArrow = (ImageView) v.findViewById(R.id.title_image_arrow);
+            this.bttnContentDelete = (Button) v.findViewById(R.id.content_button_delete);
+            this.bttnContentModify = (Button) v.findViewById(R.id.content_button_modify);
 
             this.txtContentName = (TextView) v.findViewById(R.id.content_txt_name);
             this.txtContentDate = (TextView) v.findViewById(R.id.content_txt_date);
@@ -67,7 +72,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             this.txtContentCategory = (TextView) v.findViewById(R.id.content_txt_category);
             this.imgContentEvent = (ImageView) v.findViewById(R.id.content_img_event);
             this.imgContentLoop = (ImageView) v.findViewById(R.id.content_img_loop);
-            this.imgContentNoti = (ImageView) v.findViewById(R.id.content_img_noti);
         }
     }
 
@@ -168,9 +172,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.imgContentEvent.setImageResource(imageResource);
         if(listViewItem.isLoop())
             viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
-        if(listViewItem.isNotification())
-            viewHolder.imgContentNoti.setImageResource(R.drawable.img_true);
 
+        viewHolder.bttnContentModify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(mContext, "heeloo", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -10,14 +11,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activities.MainActivity"
     android:background="@drawable/background">
-
-    <Button
-        android:id="@+id/bttnAddEvent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="addEvent"
-        android:text="add Event"
-        android:visibility="gone"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/lstEvent"
@@ -29,4 +22,15 @@
         android:padding="@dimen/item_margin"
         android:scrollbarStyle="outsideOverlay" />
 
-</LinearLayout>
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/star"
+        android:onClick="addEvent"
+        fab:fab_colorNormal="@color/colorAccent"
+        fab:fab_colorPressed="@color/colorPrimary"
+        fab:fab_colorRipple="@color/colorPrimaryDark" />
+</FrameLayout>

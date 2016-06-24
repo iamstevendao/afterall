@@ -16,6 +16,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.AddingEventActivity"/>
+        <receiver android:name=".items.NotificationPublisher" />
     </application>
 
 </manifest>

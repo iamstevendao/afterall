@@ -1,10 +1,14 @@
 package fukie.afterall.activities;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +21,7 @@ import android.view.View;
 import android.widget.Toast;
 
 
+import com.melnykov.fab.FloatingActionButton;
 import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.ArrayList;
@@ -26,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
@@ -57,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.attachToRecyclerView(lstEvent);
 
         databaseProcess = new DatabaseProcess(context);
 
@@ -84,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             default:
                 break;
         }
-
+        scheduleNotification(getNotification("5 second delay"), 5000);
         List<Events> listViewItems = databaseProcess.getAllEvent();
         final RecyclerAdapter recyclerAdapter =
                 new RecyclerAdapter(this, rearrangeList(listViewItems));
@@ -141,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private List<Events> rearrangeList(List<Events> listViewItems) {
-        int countNegative = 0;
+        int countPositive = 0;
         int countZero = 0;
         for (int i = 0; i < listViewItems.size() - 1; i++) {
             for (int j = i + 1; j < listViewItems.size(); j++) {
@@ -153,21 +161,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         for(int i = 0; i< listViewItems.size(); i++){
-            if (listViewItems.get(i).getDiff() < 0)
-                countNegative++;
+            if (listViewItems.get(i).getDiff() > 0)
+                countPositive++;
             if (listViewItems.get(i).getDiff() == 0)
                 countZero++;
         }
         List<Events> items = new ArrayList<>(listViewItems.size());
-        for (int i = countNegative; i < countNegative + countZero; i++) {
+        for (int i = countPositive; i < countPositive + countZero; i++) {
             items.add(listViewItems.get(i));
         }
-        for (int i = countNegative - 1; i > -1; i--) {
+        for (int i = countPositive - 1; i > -1; i--) {
             items.add(listViewItems.get(i));
         }
-        for (int i = countNegative + countZero; i < listViewItems.size(); i++) {
+        for (int i = countPositive + countZero; i < listViewItems.size(); i++) {
             items.add(listViewItems.get(i));
         }
         return items;
+    }
+
+    private void scheduleNotification(Notification notification, int delay) {
+
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Scheduled Notification");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.img_true);
+        return builder.build();
     }
 }
