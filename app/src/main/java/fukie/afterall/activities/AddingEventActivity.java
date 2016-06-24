@@ -5,13 +5,21 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,34 +31,53 @@ import fukie.afterall.items.SpinnerAdapter;
 
 public class AddingEventActivity extends AppCompatActivity {
     DatabaseProcess databaseProcess;
-    EditText txtName;
-    EditText txtDate;
-    Spinner spinner;
-    RadioGroup rdMemory;
-    RadioButton rd100;
-    RadioButton rdYear;
-    RadioButton rdMonth;
-    CheckBox chckLoop;
+    TextView textName;
+    TextView textDate;
+    ToggleButton toggleButton;
+    TextView textCategory;
+    Spinner spinnerCategory;
+    ImageView imageBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
         databaseProcess = new DatabaseProcess(MainActivity.context);
-        txtName = (EditText) findViewById(R.id.txtName);
-        txtDate = (EditText) findViewById(R.id.txtDate);
-        spinner = (Spinner) findViewById(R.id.spinnerKind);
-        rdMemory = (RadioGroup) findViewById(R.id.rdMemory);
-        rd100 = (RadioButton) findViewById(R.id.rd100);
-        rdYear = (RadioButton) findViewById(R.id.rdYear);
-        rdMonth = (RadioButton) findViewById(R.id.rdMonth);
-        chckLoop = (CheckBox) findViewById(R.id.chckLoop);
+        textName = (TextView) findViewById(R.id.add_name);
+        textDate = (TextView) findViewById(R.id.add_date);
+        textCategory = (TextView) findViewById(R.id.add_text_category);
+        spinnerCategory = (Spinner) findViewById(R.id.add_spinner_category);
+        toggleButton = (ToggleButton) findViewById(R.id.add_toggle);
+        imageBackground = (ImageView) findViewById(R.id.add_background);
 
         Cursor cur = databaseProcess.query("select * from kind order by kind_id");
         SpinnerAdapter spinnerAdapter = new SpinnerAdapter(MainActivity.context, cur);
-        spinner.setAdapter(spinnerAdapter);
+        spinnerCategory.setAdapter(spinnerAdapter);
 
-        txtDate.setOnClickListener(new View.OnClickListener() {
+        textName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final PopupWindow mpopup;
+                final View popUpView = getLayoutInflater().inflate(R.layout.about, null,false);
+
+                mpopup = new PopupWindow(popUpView, 400, 500, true);
+                mpopup.setAnimationStyle(android.R.style.Animation_Dialog);
+                mpopup.showAtLocation(popUpView, Gravity.CENTER, 0, 0);
+
+                Button cancel=(Button)popUpView.findViewById(R.id.close1);
+                cancel.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View arg0) {
+                        // to dismiss popup();
+                        mpopup.dismiss();
+
+                    }
+                });
+            }
+        });
+
+        textDate.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -69,7 +96,7 @@ public class AddingEventActivity extends AppCompatActivity {
                                 , Locale.getDefault());
                         Calendar newDate = Calendar.getInstance();
                         newDate.set(selectedYear, selectedMonth, selectedDay);
-                        txtDate.setText(sdf.format(newDate.getTime()));
+                        textDate.setText(sdf.format(newDate.getTime()));
                     }
                 }, mYear, mMonth, mDay);
                 mDatePicker.setTitle("Select date");
@@ -79,17 +106,16 @@ public class AddingEventActivity extends AppCompatActivity {
     }
 
     public void submitAddEvent(View target) throws Exception {
-        if (txtName.getText().toString().length() > 0
-                && txtDate.getText().toString().length() > 0) {
+        if (textName.getText().toString().length() > 0
+                && textDate.getText().toString().length() > 0) {
             int loop = 0;
-            if (chckLoop.isChecked()) {
+            if (toggleButton.isChecked()) {
                 loop = 1;
             }
-            databaseProcess.insertEvent(txtName.getText().toString(),
-                    spinner.getSelectedItemPosition() + 1,
-                    txtDate.getText().toString(),
+            databaseProcess.insertEvent(textName.getText().toString(),
+                    spinnerCategory.getSelectedItemPosition() + 1,
+                    textDate.getText().toString(),
                     loop,
-                    0,
                     2);
             Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
             startActivity(intent);

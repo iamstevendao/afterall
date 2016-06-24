@@ -3,57 +3,162 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
     tools:context=".activities.AddingEventActivity">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="name"
-        android:id="@+id/txtName"/>
-    <Spinner
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/spinnerKind"/>
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="date"
-        android:id="@+id/txtDate"/>
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="loop?"
-        android:id="@+id/chckLoop"/>
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/rdMemory"
-        android:orientation="horizontal">
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="100days"
-            android:id="@+id/rd100"
-            android:checked="true"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="year"
-            android:id="@+id/rdYear"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="month"
-            android:id="@+id/rdMonth"/>
-    </RadioGroup>
-    <Button android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="submit"
-        android:onClick="submitAddEvent" />
+        android:text="Event"
+        android:layout_marginStart="@dimen/add_padding"
+        android:layout_marginBottom="@dimen/add_padding"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/add_padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Name"
+            android:textSize="@dimen/size_text_name" />
+
+        <TextView
+            android:id="@+id/add_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="right"
+            android:text="hello"
+            android:textSize="@dimen/size_text_name"/>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginTop="7dp"
+        android:src="@color/contentDividerLine" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/add_padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:textSize="@dimen/size_text_name" />
+
+        <TextView
+            android:id="@+id/add_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="123"
+            android:textSize="@dimen/size_text_name" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:layout_marginStart="6dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Annual"
+            android:textSize="7pt"/>
+
+        <ToggleButton
+            android:id="@+id/add_toggle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:checked="false"
+            android:textOn=""
+            android:textOff=""
+            android:background="@drawable/toggle_background"/>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginTop="7dp"
+        android:src="@color/contentDividerLine" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/add_padding">
+
+        <TextView
+            android:id="@+id/add_text_category"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Category"
+            android:textSize="@dimen/size_text_name"/>
+
+        <Spinner
+            android:id="@+id/add_spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginTop="7dp"
+        android:src="@color/contentDividerLine" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/add_padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="background"
+            android:textSize="@dimen/size_text_name"/>
+
+            <ImageView
+                android:id="@+id/add_background"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/life"
+                android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginTop="7dp"
+        android:src="@color/contentDividerLine" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:onClick="cancelAddEvent"
+            android:text="cancel"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:onClick="submitAddEvent"
+            android:text="submit"/>
+    </LinearLayout>
 </LinearLayout>

@@ -15,17 +15,15 @@ public class Events {
     private String date;
     private int diff;
     private boolean loop;
-    private boolean notification;
     private int img;
 
     public Events(String name, int kind, int color, String date
-            , boolean loop, boolean notification, int img) {
+            , boolean loop, int img) {
         this.name = name;
         this.kind = kind;
         this.color = color;
         this.date = date;
         this.loop = loop;
-        this.notification = notification;
         this.img = img;
         try {
             this.diff = getDiffDate();
@@ -101,10 +99,6 @@ public class Events {
         int diffDay = now.get(Calendar.DATE) - event.get(Calendar.DATE);
         string += String.valueOf(diffDay) + "days ";
         return string;
-    }
-
-    public boolean isNotification() {
-        return notification;
     }
 
     public String getImageUri() {
