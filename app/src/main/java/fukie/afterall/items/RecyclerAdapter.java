@@ -1,8 +1,6 @@
 package fukie.afterall.items;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -19,8 +17,7 @@ import com.ramotion.foldingcell.FoldingCell;
 import java.util.HashSet;
 import java.util.List;
 
-import fukie.afterall.utils.BitmapBlur;
-import fukie.afterall.utils.Constant;
+import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
 
@@ -85,37 +82,37 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             ((FoldingCell) viewHolder.itemView).fold(true);
         }
         switch (listViewItem.getColor()) {
-            case Constant.COLOR_PINK:
+            case Constants.COLOR_PINK:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.pink_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_pink);
                 break;
-            case Constant.COLOR_RED:
+            case Constants.COLOR_RED:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.red_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_red);
                 break;
-            case Constant.COLOR_BLUE:
+            case Constants.COLOR_BLUE:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.blue_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_blue);
                 break;
-            case Constant.COLOR_GREEN:
+            case Constants.COLOR_GREEN:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.green_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_green);
                 break;
-            case Constant.COLOR_YELLOW:
+            case Constants.COLOR_YELLOW:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.yellow_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_yellow);
                 break;
-            case Constant.COLOR_GRAY:
+            case Constants.COLOR_GRAY:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.gray_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_gray);
                 break;
-            case Constant.COLOR_BLACK:
+            case Constants.COLOR_BLACK:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
                         , R.color.black_transparent), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_black);
@@ -123,23 +120,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
 
         switch (listViewItem.getKind()) {
-            case Constant.EVENT_ANNIVERSARY:
+            case Constants.EVENT_ANNIVERSARY:
                // viewHolder.imgTitleEvent.setImageResource(R.drawable.anniversary);
                 viewHolder.txtContentCategory.setText("ANNIVERSARY");
                 break;
-            case Constant.EVENT_EDUCATION:
+            case Constants.EVENT_EDUCATION:
               //  viewHolder.imgTitleEvent.setImageResource(R.drawable.education);
                 viewHolder.txtContentCategory.setText("EDUCATION");
                 break;
-            case Constant.EVENT_JOB:
+            case Constants.EVENT_JOB:
               //  viewHolder.imgTitleEvent.setImageResource(R.drawable.job);
                 viewHolder.txtContentCategory.setText("JOB");
                 break;
-            case Constant.EVENT_LIFE:
+            case Constants.EVENT_LIFE:
                // viewHolder.imgTitleEvent.setImageResource(R.drawable.life);
                 viewHolder.txtContentCategory.setText("LIFE");
                 break;
-            case Constant.EVENT_TRIP:
+            case Constants.EVENT_TRIP:
               //  viewHolder.imgTitleEvent.setImageResource(R.drawable.trip);
                 viewHolder.txtContentCategory.setText("TRIP");
                 break;

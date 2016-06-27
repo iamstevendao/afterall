@@ -2,10 +2,12 @@ package fukie.afterall.utils;
 
 import java.util.Map;
 
+import fukie.afterall.R;
+
 /**
  * Created by Fukie on 27/05/2016.
  */
-public class Constant {
+public class Constants {
     public static final int EVENT_ANNIVERSARY = 1;
     public static final int EVENT_EDUCATION = 2;
     public static final int EVENT_JOB = 3;
@@ -33,4 +35,19 @@ public class Constant {
     public static final String EVENT_COLUMN_LOOP = "event_loop";
     public static final String EVENT_COLUMN_NOTIFICATION = "event_notification";
     public static final String EVENT_COLUMN_IMAGE = "event_image";
+
+
+    // references to our images
+    public static Integer[] background = {
+            R.drawable.bg2, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4
+    };
 }

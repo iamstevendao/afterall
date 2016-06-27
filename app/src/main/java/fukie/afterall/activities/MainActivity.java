@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(context, "Unable to determine current app version from pacakge manager."
-                    + " Defenisvely assuming normal app start.", Toast.LENGTH_SHORT).show();
+                    + " Defensively assuming normal app start.", Toast.LENGTH_SHORT).show();
         }
         return appStart;
     }

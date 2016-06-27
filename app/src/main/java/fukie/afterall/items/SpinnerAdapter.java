@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import fukie.afterall.utils.Constant;
+import fukie.afterall.utils.Constants;
 import fukie.afterall.R;
 
 /**
@@ -46,20 +46,20 @@ public class SpinnerAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        switch (cursor.getInt(cursor.getColumnIndex(Constant.KIND_COLUMN_ID))){
-            case Constant.EVENT_ANNIVERSARY:
+        switch (cursor.getInt(cursor.getColumnIndex(Constants.KIND_COLUMN_ID))){
+            case Constants.EVENT_ANNIVERSARY:
                 viewHolder.imgEvent.setImageResource(R.drawable.anniversary);
                 break;
-            case Constant.EVENT_EDUCATION:
+            case Constants.EVENT_EDUCATION:
                 viewHolder.imgEvent.setImageResource(R.drawable.education);
                 break;
-            case Constant.EVENT_JOB:
+            case Constants.EVENT_JOB:
                 viewHolder.imgEvent.setImageResource(R.drawable.job);
                 break;
-            case Constant.EVENT_LIFE:
+            case Constants.EVENT_LIFE:
                 viewHolder.imgEvent.setImageResource(R.drawable.life);
                 break;
-            case Constant.EVENT_TRIP:
+            case Constants.EVENT_TRIP:
                 viewHolder.imgEvent.setImageResource(R.drawable.trip);
                 break;
             default:
@@ -67,38 +67,38 @@ public class SpinnerAdapter extends BaseAdapter {
                 break;
         }
 
-        switch (cursor.getInt(cursor.getColumnIndex(Constant.KIND_COLUMN_COLOR))) {
-            case Constant.COLOR_PINK:
+        switch (cursor.getInt(cursor.getColumnIndex(Constants.KIND_COLUMN_COLOR))) {
+            case Constants.COLOR_PINK:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.pink_transparent));
                 break;
-            case Constant.COLOR_RED:
+            case Constants.COLOR_RED:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.red_transparent));
                 break;
-            case Constant.COLOR_BLUE:
+            case Constants.COLOR_BLUE:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.blue_transparent));
                 break;
-            case Constant.COLOR_GREEN:
+            case Constants.COLOR_GREEN:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.green_transparent));
                 break;
-            case Constant.COLOR_YELLOW:
+            case Constants.COLOR_YELLOW:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.yellow_transparent));
                 break;
-            case Constant.COLOR_GRAY:
+            case Constants.COLOR_GRAY:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.gray_transparent));
                 break;
-            case Constant.COLOR_BLACK:
+            case Constants.COLOR_BLACK:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
                         , R.color.black_transparent));
                 break;
         }
         viewHolder.txtName.setText(cursor.getString(
-                cursor.getColumnIndex(Constant.KIND_COLUMN_NAME)));
+                cursor.getColumnIndex(Constants.KIND_COLUMN_NAME)));
         return convertView;
     }
 

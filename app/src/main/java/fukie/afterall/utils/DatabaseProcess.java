@@ -4,10 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by Fukie on 23/05/2016.
@@ -19,7 +17,7 @@ public class DatabaseProcess {
 
     public DatabaseProcess(Context context) {
         this.context = context;
-        this.db = context.openOrCreateDatabase(Constant.DATABASE_NAME, Context.MODE_PRIVATE, null);
+        this.db = context.openOrCreateDatabase(Constants.DATABASE_NAME, Context.MODE_PRIVATE, null);
         db.execSQL(
                 "create table if not exists event" +
                         "(event_id integer primary key autoincrement, event_name text, " +
@@ -80,12 +78,12 @@ public class DatabaseProcess {
         try {
             while (!res.isAfterLast()) {
                 Events event = new Events(
-                        res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_NAME))
-                        , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_ID))
-                        , res.getInt(res.getColumnIndex(Constant.KIND_COLUMN_COLOR))
-                        , res.getString(res.getColumnIndex(Constant.EVENT_COLUMN_DATE))
-                        , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_LOOP)) == 1
-                        , res.getInt(res.getColumnIndex(Constant.EVENT_COLUMN_IMAGE)));
+                        res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
+                        , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_ID))
+                        , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_COLOR))
+                        , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_DATE))
+                        , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP)) == 1
+                        , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_IMAGE)));
                 events.add(event);
                 res.moveToNext();
             }
