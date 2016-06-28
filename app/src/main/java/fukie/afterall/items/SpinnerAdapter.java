@@ -28,7 +28,6 @@ public class SpinnerAdapter extends BaseAdapter {
 
     private class ViewHolder {
         TextView txtName;
-        ImageView imgEvent;
         LinearLayout layoutHolder;
     }
 
@@ -38,7 +37,6 @@ public class SpinnerAdapter extends BaseAdapter {
         if(convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.spinner_item, null);
             viewHolder = new ViewHolder();
-            viewHolder.imgEvent = (ImageView) convertView.findViewById(R.id.imgSpinnerItem);
             viewHolder.txtName = (TextView) convertView.findViewById(R.id.txtSpinnerItem);
             viewHolder.layoutHolder = (LinearLayout)
                     convertView.findViewById(R.id.layoutSpinnerHolder);
@@ -46,31 +44,11 @@ public class SpinnerAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        switch (cursor.getInt(cursor.getColumnIndex(Constants.KIND_COLUMN_ID))){
-            case Constants.EVENT_ANNIVERSARY:
-                viewHolder.imgEvent.setImageResource(R.drawable.anniversary);
-                break;
-            case Constants.EVENT_EDUCATION:
-                viewHolder.imgEvent.setImageResource(R.drawable.education);
-                break;
-            case Constants.EVENT_JOB:
-                viewHolder.imgEvent.setImageResource(R.drawable.job);
-                break;
-            case Constants.EVENT_LIFE:
-                viewHolder.imgEvent.setImageResource(R.drawable.life);
-                break;
-            case Constants.EVENT_TRIP:
-                viewHolder.imgEvent.setImageResource(R.drawable.trip);
-                break;
-            default:
-                viewHolder.imgEvent.setImageResource(R.drawable.other);
-                break;
-        }
 
         switch (cursor.getInt(cursor.getColumnIndex(Constants.KIND_COLUMN_COLOR))) {
             case Constants.COLOR_PINK:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context
-                        , R.color.pink_transparent));
+                        , R.color.pink_reduced));
                 break;
             case Constants.COLOR_RED:
                 viewHolder.layoutHolder.setBackgroundColor(ContextCompat.getColor(context

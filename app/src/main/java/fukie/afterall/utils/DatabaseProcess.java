@@ -52,15 +52,15 @@ public class DatabaseProcess {
 
     public void insertEvent(String name, int kind, String date, int loop, int img) {
         db.execSQL("INSERT INTO event(event_name, kind_id, event_date"
-                + ", event_loop, event_notification, event_image) "
+                + ", event_loop, event_image) "
                 + "VALUES('" + name + "', " + kind + ", '" + date + "', "
                 + loop + ", " + img + ");");
     }
 
     public void addExample() throws Exception {
         insertEvent("Yêu xa nhé!", 1, "2016-5-14", 0, 2);
-        insertEvent("Có!", 1, "2012-01-5", 0, 1);
-        insertEvent("Sinh Nhật Lợn", 5, "1995-02-5", 1, 3);
+        insertEvent("Có!", 1, "2012-01-05", 0, 1);
+        insertEvent("Sinh Nhật Lợn", 5, "1995-02-05", 1, 3);
         insertEvent("Sinh Nhật Chó", 3, "1995-9-16", 1, 4);
         insertEvent("choi", 4, "2016-6-20", 0, 1);
     }

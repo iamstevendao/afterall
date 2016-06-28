@@ -84,7 +84,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         switch (listViewItem.getColor()) {
             case Constants.COLOR_PINK:
                 ((FoldingCell) viewHolder.itemView).initialize(1200, ContextCompat.getColor(mContext
-                        , R.color.pink_transparent), 1);
+                        , R.color.pink_reduced), 1);
                 viewHolder.imgTitleBlur.setBackgroundResource(R.drawable.blur_pink);
                 break;
             case Constants.COLOR_RED:
@@ -163,10 +163,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }catch (Exception e){
             e.printStackTrace();
         }
-        int imageResource = mContext.getResources()
-                .getIdentifier(listViewItem.getImageUri(), null, mContext.getPackageName());
-        viewHolder.imgTitleEvent.setImageResource(imageResource);
-        viewHolder.imgContentEvent.setImageResource(imageResource);
+        viewHolder.imgTitleEvent.setImageResource(Constants.background[listViewItem.getImg()]);
+        viewHolder.imgContentEvent.setImageResource(Constants.background[listViewItem.getImg()]);
         if(listViewItem.isLoop())
             viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
 

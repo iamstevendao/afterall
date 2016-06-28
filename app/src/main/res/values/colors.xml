@@ -32,4 +32,8 @@
     <color name="edittext_background">#f44336</color>
     <color name="bgBackSideColor">#f4f0ff</color>
     <color name="contentDividerLine">#e0e0e0</color>
+
+    <color name="dim_color">#CC000000</color>
+
+    <color name="pink_reduced">#F06292</color>
 </resources>

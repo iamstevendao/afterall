@@ -17,8 +17,10 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,7 +29,9 @@ import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.ImageAdapter;
@@ -47,6 +51,9 @@ public class AddingEventActivity extends AppCompatActivity {
     Spinner spinnerCategory;
     ImageView imageBackground;
     Context context;
+    int currentImage;
+    LinearLayout categoryContainer;
+    LinearLayout mainContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,32 +67,83 @@ public class AddingEventActivity extends AppCompatActivity {
         spinnerCategory = (Spinner) findViewById(R.id.add_spinner_category);
         toggleButton = (ToggleButton) findViewById(R.id.add_toggle);
         imageBackground = (ImageView) findViewById(R.id.add_background);
+        categoryContainer = (LinearLayout) findViewById(R.id.add_category_container);
+        mainContainer = (LinearLayout) findViewById(R.id.add_main_container);
+
+        final Rect displayRectangle = new Rect();
+        Window window = AddingEventActivity.this.getWindow();
+        window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
 
         Cursor cur = databaseProcess.query("select * from kind order by kind_id");
         SpinnerAdapter spinnerAdapter = new SpinnerAdapter(MainActivity.context, cur);
         spinnerCategory.setAdapter(spinnerAdapter);
+        Random random = new Random();
+        currentImage = random.nextInt(Constants.background.length);
+        imageBackground.setImageResource(Constants.background[currentImage]);
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        textDate.setText(sdf.format(today));
+        categoryContainer.setBackgroundColor(ContextCompat.getColor(
+                context, Constants.eventColor[spinnerCategory.getSelectedItemPosition()]));
+
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView
+                    , int position, long id) {
+                categoryContainer.setBackgroundColor(ContextCompat.getColor(
+                        context, Constants.eventColor[spinnerCategory.getSelectedItemPosition()]));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
 
         textName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final PopupWindow mpopup;
                 final View popUpView = getLayoutInflater()
-                        .inflate(R.layout.add_name_layout, null,false);
+                        .inflate(R.layout.add_name_layout, null, false);
 
-                mpopup = new PopupWindow(popUpView, 400, 500, true);
+                mpopup = new PopupWindow(popUpView,
+                        (int) (displayRectangle.width() * 0.7f)
+                        , (int) (displayRectangle.height() * 0.4f)
+                        , true);
                 mpopup.setAnimationStyle(android.R.style.Animation_Dialog);
                 mpopup.showAtLocation(popUpView, Gravity.CENTER, 0, 0);
-
-                Button cancel=(Button)popUpView.findViewById(R.id.close1);
+                final EditText editText = (EditText) popUpView.findViewById(R.id.add_name_edit);
+                Button cancel = (Button) popUpView.findViewById(R.id.add_name_close);
                 cancel.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View arg0) {
                         // to dismiss popup();
+                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                         mpopup.dismiss();
 
                     }
                 });
+                Button submit = (Button) popUpView.findViewById(R.id.add_name_submit);
+                submit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        textName.setText(editText.getText());
+                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
+                        mpopup.dismiss();
+                    }
+                });
+                mpopup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+
+                    @Override
+                    public void onDismiss() {
+                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
+                        mpopup.dismiss();
+                    }
+                });
+                mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
             }
         });
 
@@ -122,12 +180,10 @@ public class AddingEventActivity extends AppCompatActivity {
                 final PopupWindow mpopup;
                 final View popUpView = getLayoutInflater()
                         .inflate(R.layout.add_background_layout, null, false);
-                Rect displayRectangle = new Rect();
-                Window window = AddingEventActivity.this.getWindow();
-                window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
+
                 mpopup = new PopupWindow(popUpView
-                        , (int)(displayRectangle.width() * 0.9f)
-                        , (int)(displayRectangle.height() * 0.7f)
+                        , (int) (displayRectangle.width() * 0.9f)
+                        , (int) (displayRectangle.height() * 0.7f)
                         , true);
 
                 mpopup.setAnimationStyle(android.R.style.Animation_Dialog);
@@ -141,14 +197,20 @@ public class AddingEventActivity extends AppCompatActivity {
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
                 recyclerView.setAdapter(recyclerAdapter);
+                mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
 
-//                re.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                    public void onItemClick(AdapterView<?> parent, View v,
-//                                            int position, long id) {
-//                        Toast.makeText(AddingEventActivity.this, "" + position,
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-//                });
+                recyclerView.addOnItemTouchListener(
+                        new RecyclerItemClickListener(context
+                                , new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                imageBackground.setImageResource(Constants.background[position]);
+                                currentImage = position;
+                                mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
+                                mpopup.dismiss();
+                            }
+                        })
+                );
             }
         });
     }
@@ -164,9 +226,14 @@ public class AddingEventActivity extends AppCompatActivity {
                     spinnerCategory.getSelectedItemPosition() + 1,
                     textDate.getText().toString(),
                     loop,
-                    2);
+                    currentImage);
             Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
             startActivity(intent);
         }
+    }
+
+    public void cancelAddEvent(View target) {
+        Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
+        startActivity(intent);
     }
 }

@@ -72,6 +72,8 @@ public class Events {
         return date;
     }
 
+    public int getImg() { return img;}
+
     public boolean isLoop() {
         return loop;
     }

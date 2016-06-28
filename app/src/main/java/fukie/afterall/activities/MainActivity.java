@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
 
-    static Context context;
+    public static Context context;
 
     SharedPreferences sharedPreferences;
 

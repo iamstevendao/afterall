@@ -1,8 +1,11 @@
 package fukie.afterall.utils;
 
+import android.support.v4.content.ContextCompat;
+
 import java.util.Map;
 
 import fukie.afterall.R;
+import fukie.afterall.activities.MainActivity;
 
 /**
  * Created by Fukie on 27/05/2016.
@@ -43,11 +46,16 @@ public class Constants {
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1
+    };
+
+    public static Integer[] eventColor = {
+            R.color.pink_reduced,
+            R.color.red_transparent,
+            R.color.blue_transparent,
+            R.color.green_transparent,
+            R.color.yellow_transparent,
+            R.color.gray_transparent,
+            R.color.black_transparent
     };
 }
