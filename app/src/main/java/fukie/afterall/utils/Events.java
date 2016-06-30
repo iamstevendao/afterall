@@ -9,16 +9,18 @@ import java.util.Locale;
  * Created by Fukie on 23/05/2016.
  */
 public class Events {
+    private int id;
     private String name;
     private int kind;
     private int color;
     private String date;
     private int diff;
-    private boolean loop;
+    private int loop;
     private int img;
 
-    public Events(String name, int kind, int color, String date
-            , boolean loop, int img) {
+    public Events(int id, String name, int kind, int color, String date
+            , int loop, int img) {
+        this.id = id;
         this.name = name;
         this.kind = kind;
         this.color = color;
@@ -37,7 +39,7 @@ public class Events {
         int diffDays;
         Date dateOfEvent = sdf.parse(date);
         Date today = new Date();
-        if (loop) {
+        if (loop == 1) {
             Calendar c = Calendar.getInstance();
             c.setTime(dateOfEvent);
             while (today.after(c.getTime())) {
@@ -74,10 +76,11 @@ public class Events {
 
     public int getImg() { return img;}
 
-    public boolean isLoop() {
+    public int getLoop() {
         return loop;
     }
 
+    public int getId() {return id;}
     public String getDiffString() throws Exception {
         String string = "";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -101,9 +104,5 @@ public class Events {
         int diffDay = now.get(Calendar.DATE) - event.get(Calendar.DATE);
         string += String.valueOf(diffDay) + "days ";
         return string;
-    }
-
-    public String getImageUri() {
-        return "@drawable/bg" + img;
     }
 }

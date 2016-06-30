@@ -1,8 +1,12 @@
 package fukie.afterall.items;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +21,10 @@ import com.ramotion.foldingcell.FoldingCell;
 import java.util.HashSet;
 import java.util.List;
 
+import fukie.afterall.activities.AddingEventActivity;
+import fukie.afterall.activities.MainActivity;
 import fukie.afterall.utils.Constants;
+import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
 
@@ -29,7 +36,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     private List<Events> objects;
     private Context mContext;
     private HashSet<Integer> unfoldedIndexes = new HashSet<>();
-
+    DatabaseProcess db;
     public RecyclerAdapter(Context context, List<Events> cur) {
         mContext = context;
         objects = cur;
@@ -53,7 +60,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
         public ViewHolder(View v, Context context) {
             super(v);
-            Typeface face=Typeface.createFromAsset(context.getAssets(), "fonts/MobileSans.ttf");
+            Typeface face = Typeface.createFromAsset(context.getAssets(), "fonts/MobileSans.ttf");
             this.txtTitleName = (TextView) v.findViewById(R.id.title_txt_name);
             this.txtTitleCount = (TextView) v.findViewById(R.id.title_txt_count);
             this.txtTitleCount.setTypeface(face);
@@ -74,8 +81,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Events listViewItem = objects.get(position);
+    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+        final Events listViewItem = objects.get(position);
         if (unfoldedIndexes.contains(position)) {
             ((FoldingCell) viewHolder.itemView).unfold(true);
         } else {
@@ -121,36 +128,36 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
         switch (listViewItem.getKind()) {
             case Constants.EVENT_ANNIVERSARY:
-               // viewHolder.imgTitleEvent.setImageResource(R.drawable.anniversary);
+                // viewHolder.imgTitleEvent.setImageResource(R.drawable.anniversary);
                 viewHolder.txtContentCategory.setText("ANNIVERSARY");
                 break;
             case Constants.EVENT_EDUCATION:
-              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.education);
+                //  viewHolder.imgTitleEvent.setImageResource(R.drawable.education);
                 viewHolder.txtContentCategory.setText("EDUCATION");
                 break;
             case Constants.EVENT_JOB:
-              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.job);
+                //  viewHolder.imgTitleEvent.setImageResource(R.drawable.job);
                 viewHolder.txtContentCategory.setText("JOB");
                 break;
             case Constants.EVENT_LIFE:
-               // viewHolder.imgTitleEvent.setImageResource(R.drawable.life);
+                // viewHolder.imgTitleEvent.setImageResource(R.drawable.life);
                 viewHolder.txtContentCategory.setText("LIFE");
                 break;
             case Constants.EVENT_TRIP:
-              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.trip);
+                //  viewHolder.imgTitleEvent.setImageResource(R.drawable.trip);
                 viewHolder.txtContentCategory.setText("TRIP");
                 break;
             default:
-              //  viewHolder.imgTitleEvent.setImageResource(R.drawable.other);
+                //  viewHolder.imgTitleEvent.setImageResource(R.drawable.other);
                 viewHolder.txtContentCategory.setText("OTHERS");
                 break;
         }
         viewHolder.txtTitleName.setText(listViewItem.getName());
 
-        if(listViewItem.getDiff() > 0) {
+        if (listViewItem.getDiff() > 0) {
             viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
             viewHolder.imgTitleArrow.setImageResource(R.drawable.arrow_right);
-        } else if(listViewItem.getDiff() == 0){
+        } else if (listViewItem.getDiff() == 0) {
             viewHolder.imgTitleArrow.setVisibility(View.GONE);
             viewHolder.txtTitleCount.setText(String.valueOf(0));
         } else
@@ -160,18 +167,48 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.txtContentName.setText(listViewItem.getName());
         try {
             viewHolder.txtContentDiffDate.setText(listViewItem.getDiffString());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         viewHolder.imgTitleEvent.setImageResource(Constants.background[listViewItem.getImg()]);
         viewHolder.imgContentEvent.setImageResource(Constants.background[listViewItem.getImg()]);
-        if(listViewItem.isLoop())
+        if (listViewItem.getLoop() == 1)
             viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
 
         viewHolder.bttnContentModify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(mContext, "heeloo", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(mContext, AddingEventActivity.class);
+                intent.putExtra("id", listViewItem.getId());
+                intent.putExtra("name", listViewItem.getName());
+                intent.putExtra("loop", listViewItem.getLoop());
+                intent.putExtra("spinner", listViewItem.getKind() - 1);
+                intent.putExtra("date", listViewItem.getDate());
+                intent.putExtra("img", listViewItem.getImg());
+                mContext.startActivity(intent);
+            }
+        });
+
+        viewHolder.bttnContentDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+
+                dialog.setTitle("Warning")
+                        .setIcon(R.drawable.img_true)
+                        .setMessage("Delete Event?")
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialoginterface, int i) {
+                                dialoginterface.cancel();
+                            }
+                        })
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialoginterface, int i) {
+                                db = new DatabaseProcess(mContext);
+                                db.deleteEvent(listViewItem.getId());
+                                removeAt(position);
+                            }
+                        }).show();
             }
         });
     }
@@ -202,6 +239,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void registerUnfold(int position) {
         unfoldedIndexes.add(position);
     }
+
+    public void removeAt(int position) {
+        objects.remove(position);
+        notifyItemRemoved(position);
+       // notifyItemRangeChanged(position, objects.size());
+    }
+
 }
 
 

@@ -22,6 +22,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,8 +53,14 @@ public class AddingEventActivity extends AppCompatActivity {
     ImageView imageBackground;
     Context context;
     int currentImage;
-    LinearLayout categoryContainer;
+    RelativeLayout categoryContainer;
     LinearLayout mainContainer;
+    LinearLayout nameHolder;
+    LinearLayout dateHolder;
+    RelativeLayout toggleHolder;
+    RelativeLayout backgroundHolder;
+    boolean isFromIntent = false;
+    Intent i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +74,12 @@ public class AddingEventActivity extends AppCompatActivity {
         spinnerCategory = (Spinner) findViewById(R.id.add_spinner_category);
         toggleButton = (ToggleButton) findViewById(R.id.add_toggle);
         imageBackground = (ImageView) findViewById(R.id.add_background);
-        categoryContainer = (LinearLayout) findViewById(R.id.add_category_container);
+        categoryContainer = (RelativeLayout) findViewById(R.id.add_category_container);
         mainContainer = (LinearLayout) findViewById(R.id.add_main_container);
+        nameHolder = (LinearLayout) findViewById(R.id.add_name_holder);
+        dateHolder = (LinearLayout) findViewById(R.id.add_date_holder);
+        toggleHolder = (RelativeLayout) findViewById(R.id.add_toggle_holder);
+        backgroundHolder = (RelativeLayout) findViewById(R.id.add_background_holder);
 
         final Rect displayRectangle = new Rect();
         Window window = AddingEventActivity.this.getWindow();
@@ -83,9 +94,19 @@ public class AddingEventActivity extends AppCompatActivity {
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         textDate.setText(sdf.format(today));
+
+        i = getIntent();
+        if (i.getStringExtra("name") != null) {
+            isFromIntent = true;
+            textName.setText(i.getStringExtra("name"));
+            textDate.setText(i.getStringExtra("date"));
+            imageBackground.setImageResource(Constants.background[i.getIntExtra("img", 0)]);
+            spinnerCategory.setSelection(i.getIntExtra("spinner", 0));
+            if(i.getIntExtra("loop", -1) == 1)
+                toggleButton.setChecked(true);
+        }
         categoryContainer.setBackgroundColor(ContextCompat.getColor(
                 context, Constants.eventColor[spinnerCategory.getSelectedItemPosition()]));
-
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView
@@ -101,7 +122,7 @@ public class AddingEventActivity extends AppCompatActivity {
 
         });
 
-        textName.setOnClickListener(new View.OnClickListener() {
+        nameHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final PopupWindow mpopup;
@@ -147,7 +168,7 @@ public class AddingEventActivity extends AppCompatActivity {
             }
         });
 
-        textDate.setOnClickListener(new View.OnClickListener() {
+        dateHolder.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -174,7 +195,7 @@ public class AddingEventActivity extends AppCompatActivity {
             }
         });
 
-        imageBackground.setOnClickListener(new View.OnClickListener() {
+        backgroundHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final PopupWindow mpopup;
@@ -216,17 +237,27 @@ public class AddingEventActivity extends AppCompatActivity {
     }
 
     public void submitAddEvent(View target) throws Exception {
+
         if (textName.getText().toString().length() > 0
                 && textDate.getText().toString().length() > 0) {
             int loop = 0;
             if (toggleButton.isChecked()) {
                 loop = 1;
             }
-            databaseProcess.insertEvent(textName.getText().toString(),
-                    spinnerCategory.getSelectedItemPosition() + 1,
-                    textDate.getText().toString(),
-                    loop,
-                    currentImage);
+            if (!isFromIntent) {
+                databaseProcess.insertEvent(textName.getText().toString(),
+                        spinnerCategory.getSelectedItemPosition() + 1,
+                        textDate.getText().toString(),
+                        loop,
+                        currentImage);
+            } else {
+                databaseProcess.modifyEvent(i.getIntExtra("id", -1)
+                        , textName.getText().toString()
+                        , spinnerCategory.getSelectedItemPosition() + 1
+                        , textDate.getText().toString()
+                        , loop
+                        , currentImage);
+            }
             Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
             startActivity(intent);
         }

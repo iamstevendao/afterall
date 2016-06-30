@@ -57,6 +57,16 @@ public class DatabaseProcess {
                 + loop + ", " + img + ");");
     }
 
+    public void modifyEvent(int id, String name, int kind, String date, int loop, int img) {
+        db.execSQL("UPDATE event SET event_name ='" + name + "', kind_id="+kind
+                +", event_date='" + date +"', event_loop=" + loop + ", event_image=" + img +
+                " WHERE event_id=" + id);
+    }
+
+    public void deleteEvent(int id){
+        db.execSQL("DELETE FROM event WHERE event_id=" + id);
+    }
+
     public void addExample() throws Exception {
         insertEvent("Yêu xa nhé!", 1, "2016-5-14", 0, 2);
         insertEvent("Có!", 1, "2012-01-05", 0, 1);
@@ -78,11 +88,12 @@ public class DatabaseProcess {
         try {
             while (!res.isAfterLast()) {
                 Events event = new Events(
-                        res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
+                        res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_ID))
+                        , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
                         , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_ID))
                         , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_COLOR))
                         , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_DATE))
-                        , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP)) == 1
+                        , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP))
                         , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_IMAGE)));
                 events.add(event);
                 res.moveToNext();
