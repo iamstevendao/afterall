@@ -1,5 +1,9 @@
 package fukie.afterall.utils;
 
+import android.text.SpannableString;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.RelativeSizeSpan;
+
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -9,6 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import fukie.afterall.R;
+import fukie.afterall.activities.MainActivity;
 
 /**
  * Created by Fukie on 23/05/2016.
@@ -55,8 +62,12 @@ public class Events {
             long diff = c.getTime().getTime() - today.getTime();
             diffDays = (int) (diff / (60 * 60 * 1000 * 24));
         } else {
+            this.dateOfLoop = sdf.format(dateOfEvent);
             long diff = dateOfEvent.getTime() - today.getTime();
             diffDays = (int) (diff / (60 * 60 * 1000 * 24));
+        }
+        if ((diffDays == 0 && !dateOfLoop.equals(sdf.format(today))) || (diffDays > 0)) {
+            diffDays++;
         }
         return diffDays;
     }
@@ -81,13 +92,17 @@ public class Events {
         return date;
     }
 
-    public int getImg() { return img;}
+    public int getImg() {
+        return img;
+    }
 
     public int getLoop() {
         return loop;
     }
 
-    public int getId() {return id;}
+    public int getId() {
+        return id;
+    }
 //    public String getDiffString() throws Exception {
 //        String string = "";
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -113,18 +128,68 @@ public class Events {
 //        return string;
 //    }
 
-    public String getDiffString() throws Exception {
+    public SpannableString getDiffString() throws Exception {
+        SpannableString spannableString;
         String string = "";
+        int sizeDate = MainActivity.context.getResources()
+                .getDimensionPixelSize(R.dimen.size_date_diff);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
         Date event;
-        if(loop == 0)
+        if (loop == 0)
             event = sdf.parse(date);
         else
             event = sdf.parse(dateOfLoop);
         DateTime then = new DateTime(event);
         DateTime now = new DateTime();
-        Period period = new Period(now, then);
-        string+= period.getYears() + " " + period.getMonths() + " " + (period.getWeeks()*7 + period.getDays());
-        return string;
+        Period period = new Period(then, now);
+        int year = period.getYears();
+        int month = period.getMonths();
+        int day = period.getDays() + period.getWeeks() * 7;
+        if (year < 0 || month < 0 || day < 0) {
+            year = -year;
+            month = -month;
+            day = -day;
+            day++;//fix bug 160701
+            string += "> ";
+        } else if (year == 0 && month == 0 && day == 0) {
+            if (sdf.format(event).equals(now.toString(fmt))) {
+                string = "TODAY";
+                spannableString = new SpannableString(string);
+                spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), 0, string.length(), 0);
+                return spannableString;
+            } else {
+                string += "> ";
+                day++;
+            }
+        } else string += "> ";
+
+        String yearx = String.valueOf(year);
+        String monthx = String.valueOf(month);
+        String dayx = String.valueOf(day);
+        boolean haveYear = false, haveMonth = false, haveDay = false;
+        int startYear = 2, startMonth = 2, startDay = 2;
+        if (year != 0) {
+            haveYear = true;
+            string += yearx + " years ";
+            startMonth = string.length();
+        }
+        if (month != 0) {
+            haveMonth = true;
+            string += monthx + " months ";
+            startDay = string.length();
+        }
+        if (day != 0) {
+            haveDay = true;
+            string += dayx + " days ";
+        }
+        spannableString = new SpannableString(string);
+        if (haveYear)
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startYear, startYear + yearx.length(), 0);
+        if (haveMonth)
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startMonth, startMonth + monthx.length(), 0);
+        if (haveDay)
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startDay, startDay + dayx.length(), 0);
+        return spannableString;
     }
 }

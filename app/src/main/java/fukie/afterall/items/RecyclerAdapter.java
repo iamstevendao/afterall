@@ -34,15 +34,18 @@ import fukie.afterall.R;
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
     private List<Events> objects;
-    private Context mContext;
+    public Context mContext;
     private HashSet<Integer> unfoldedIndexes = new HashSet<>();
-    DatabaseProcess db;
+    static DatabaseProcess db;
     public RecyclerAdapter(Context context, List<Events> cur) {
         mContext = context;
         objects = cur;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        RecyclerAdapter recyclerAdapter;
+        public static Events listViewItem;
+        public static int position;
         TextView txtTitleName;
         TextView txtTitleCount;
         ImageView imgTitleEvent;
@@ -57,6 +60,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         ImageView imgContentLoop;
         Button bttnContentModify;
         Button bttnContentDelete;
+        TextView txtContentAnnual;
 
         public ViewHolder(View v, Context context) {
             super(v);
@@ -69,20 +73,62 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             this.imgTitleArrow = (ImageView) v.findViewById(R.id.title_image_arrow);
             this.bttnContentDelete = (Button) v.findViewById(R.id.content_button_delete);
             this.bttnContentModify = (Button) v.findViewById(R.id.content_button_modify);
+            this.txtContentAnnual = (TextView) v.findViewById(R.id.content_annual);
 
             this.txtContentName = (TextView) v.findViewById(R.id.content_txt_name);
             this.txtContentDate = (TextView) v.findViewById(R.id.content_txt_date);
             this.txtContentDiffDate = (TextView) v.findViewById(R.id.content_txt_diff_date);
             this.txtContentCategory = (TextView) v.findViewById(R.id.content_txt_category);
             this.imgContentEvent = (ImageView) v.findViewById(R.id.content_img_event);
-            this.imgContentLoop = (ImageView) v.findViewById(R.id.content_img_loop);
+
+            this.bttnContentDelete.setOnClickListener(this);
+            this.bttnContentModify.setOnClickListener(this);
+        }
+        @Override
+        public void onClick(View v) {
+            // TODO Auto-generated method stub
+
+            if(v == this.bttnContentDelete)
+            {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(recyclerAdapter.mContext);
+
+                dialog.setTitle("Warning")
+                        .setIcon(R.drawable.img_true)
+                        .setMessage("Delete Event?")
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialoginterface, int i) {
+                                dialoginterface.cancel();
+                            }
+                        })
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialoginterface, int i) {
+                                db = new DatabaseProcess(recyclerAdapter.mContext);
+                                db.deleteEvent(listViewItem.getId());
+                                recyclerAdapter.removeAt(position);
+                            }
+                        }).show();
+            }
+
+            if(v == this.bttnContentModify)
+            {
+                Intent intent = new Intent(MainActivity.context, AddingEventActivity.class);
+                intent.putExtra("id", listViewItem.getId());
+                intent.putExtra("name", listViewItem.getName());
+                intent.putExtra("loop", listViewItem.getLoop());
+                intent.putExtra("spinner", listViewItem.getKind() - 1);
+                intent.putExtra("date", listViewItem.getDate());
+                intent.putExtra("img", listViewItem.getImg());
+                MainActivity.context.startActivity(intent);
+            }
         }
     }
 
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
         final Events listViewItem = objects.get(position);
+        ViewHolder.listViewItem = objects.get(position);
+        ViewHolder.position = position;
         if (unfoldedIndexes.contains(position)) {
             ((FoldingCell) viewHolder.itemView).unfold(true);
         } else {
@@ -172,45 +218,22 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
         viewHolder.imgTitleEvent.setImageResource(Constants.background[listViewItem.getImg()]);
         viewHolder.imgContentEvent.setImageResource(Constants.background[listViewItem.getImg()]);
-        if (listViewItem.getLoop() == 1)
-            viewHolder.imgContentLoop.setImageResource(R.drawable.img_true);
+        if (listViewItem.getLoop() != 1)
+            viewHolder.txtContentAnnual.setVisibility(View.INVISIBLE);
 
-        viewHolder.bttnContentModify.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mContext, AddingEventActivity.class);
-                intent.putExtra("id", listViewItem.getId());
-                intent.putExtra("name", listViewItem.getName());
-                intent.putExtra("loop", listViewItem.getLoop());
-                intent.putExtra("spinner", listViewItem.getKind() - 1);
-                intent.putExtra("date", listViewItem.getDate());
-                intent.putExtra("img", listViewItem.getImg());
-                mContext.startActivity(intent);
-            }
-        });
-
-        viewHolder.bttnContentDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-
-                dialog.setTitle("Warning")
-                        .setIcon(R.drawable.img_true)
-                        .setMessage("Delete Event?")
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialoginterface, int i) {
-                                dialoginterface.cancel();
-                            }
-                        })
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialoginterface, int i) {
-                                db = new DatabaseProcess(mContext);
-                                db.deleteEvent(listViewItem.getId());
-                                removeAt(position);
-                            }
-                        }).show();
-            }
-        });
+//        viewHolder.bttnContentModify.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
+//
+//        viewHolder.bttnContentDelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
     }
 
     @Override
@@ -243,7 +266,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void removeAt(int position) {
         objects.remove(position);
         notifyItemRemoved(position);
-       // notifyItemRangeChanged(position, objects.size());
+        notifyItemRangeRemoved(position, objects.size());
     }
 
 }

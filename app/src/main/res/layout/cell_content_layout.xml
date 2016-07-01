@@ -10,115 +10,96 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg1"/>
+        android:src="@drawable/bg1" />
 
     <TextView
         android:id="@+id/content_txt_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14pt" />
+        android:textSize="12pt"
+        android:lines="1"
+        android:layout_marginLeft="@dimen/add_padding"
+        android:layout_marginRight="@dimen/add_padding"
+        android:layout_marginTop="@dimen/add_padding"/>
+
+    <TextView
+        android:id="@+id/content_txt_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="7pt"
+        android:layout_marginLeft="@dimen/add_padding"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:src="@color/contentDividerLine"
+        android:layout_marginLeft="@dimen/add_padding"
+        android:layout_marginRight="@dimen/add_padding"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/add_padding"
+        android:layout_marginRight="@dimen/add_padding">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/content_txt_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="10pt" />
+
+            <TextView
+                android:id="@+id/content_annual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="7pt"
+                android:text="annual" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/content_txt_date"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/head_image_center_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:paddingBottom="10dp"
-                android:text="> NOW" />
-
-            <TextView
-                android:id="@+id/content_txt_diff_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/head_image_center_text"
-                android:layout_alignStart="@id/head_image_center_text" />
-        </RelativeLayout>
+            android:id="@+id/content_txt_diff_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="end"
+            android:textSize="7pt"/>
     </LinearLayout>
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="6dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginBottom="14dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="@dimen/add_padding"
+        android:layout_marginRight="@dimen/add_padding"
         android:src="@color/contentDividerLine" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/default_margin">
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin">
 
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2">
-
-            <TextView
-                android:id="@+id/content_menu_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="Category"/>
-
-            <TextView
-                android:id="@+id/content_txt_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@id/content_menu_category"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-        </RelativeLayout>
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/content_menu_loop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="Annual"/>
-
-            <ImageView
-                android:id="@+id/content_img_loop"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@id/content_menu_loop"
-                android:src="@drawable/img_false"/>
-        </RelativeLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/activity_horizontal_margin">
         <Button
             android:id="@+id/content_button_modify"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="modify" />
+
         <Button
             android:id="@+id/content_button_delete"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="delete" />
     </LinearLayout>
 </LinearLayout>

@@ -29,6 +29,7 @@
             android:layout_width="25dp"
             android:layout_height="50dp"
             android:paddingBottom="10dp"
+            android:layout_marginRight="2dp"
             android:src="@drawable/arrow_left"
             android:layout_gravity="center_vertical"/>
 
@@ -50,6 +51,9 @@
         android:gravity="center"
         android:paddingBottom="20dp"
         android:textColor="@color/white"
-        android:textSize="@dimen/size_text_name" />
+        android:textSize="@dimen/size_text_name"
+        android:layout_marginLeft="@dimen/add_padding"
+        android:layout_marginRight="@dimen/add_padding"
+        android:lines="1"/>
 
 </RelativeLayout>

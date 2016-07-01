@@ -35,7 +35,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="right"
-            android:text="hello"
+            android:text="Event Name"
+            android:lines="1"
             android:textSize="@dimen/size_text_name"/>
     </LinearLayout>
 
@@ -105,6 +106,12 @@
         android:layout_marginBottom="4dp"
         android:layout_marginTop="4dp">
 
+        <Spinner
+            android:id="@+id/add_spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"/>
+
         <TextView
             android:id="@+id/add_text_category"
             android:layout_width="wrap_content"
@@ -112,12 +119,6 @@
             android:text="Category"
             android:textSize="@dimen/size_text_name"
             android:layout_margin="8dp"/>
-
-        <Spinner
-            android:id="@+id/add_spinner_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/transparent"/>
     </RelativeLayout>
 
     <!--<ImageView-->

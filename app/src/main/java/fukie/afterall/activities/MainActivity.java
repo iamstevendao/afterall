@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         scheduleNotification(getNotification("5 second delay"), 5000);
+
         List<Events> listViewItems = databaseProcess.getAllEvent();
         final RecyclerAdapter recyclerAdapter =
                 new RecyclerAdapter(this, rearrangeList(listViewItems));
@@ -184,7 +185,8 @@ public class MainActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent(this, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
