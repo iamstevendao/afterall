@@ -10,7 +10,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import fukie.afterall.items.NotificationPublisher;
+import fukie.afterall.items.RecyclerViewClickListener;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
@@ -39,14 +39,16 @@ import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener{
     // TextView txtHello;
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
+    List<Events> listViewItems;
 
     public static Context context;
 
     SharedPreferences sharedPreferences;
+    RecyclerAdapter recyclerAdapter2;
 
     public enum AppStart {
         FIRST_TIME, FIRST_TIME_VERSION, NORMAL
@@ -94,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
         }
         scheduleNotification(getNotification("5 second delay"), 5000);
 
-        List<Events> listViewItems = databaseProcess.getAllEvent();
-        final RecyclerAdapter recyclerAdapter =
-                new RecyclerAdapter(this, rearrangeList(listViewItems));
+        listViewItems = rearrangeList(databaseProcess.getAllEvent());
+        final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems, this);
+        recyclerAdapter2 = recyclerAdapter;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         lstEvent.setLayoutManager(mLayoutManager);
         lstEvent.setItemAnimator(new DefaultItemAnimator());
@@ -114,8 +116,27 @@ public class MainActivity extends AppCompatActivity {
                 })
         );
 
+
     }
 
+    @Override
+    public void recyclerViewListClicked(int button, View v, int position){
+            if(button == 1) {
+                Events listViewItem = listViewItems.get(position);
+                Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
+                intent.putExtra("id", listViewItem.getId());
+                intent.putExtra("name", listViewItem.getName());
+                intent.putExtra("loop", listViewItem.getLoop());
+                intent.putExtra("spinner", listViewItem.getKind() - 1);
+                intent.putExtra("date", listViewItem.getDate());
+                intent.putExtra("img", listViewItem.getImg());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else {
+                databaseProcess.deleteEvent(listViewItems.get(position).getId());
+                recyclerAdapter2.removeAt(position);
+            }
+    }
 
     public void addEvent(View target) {
         Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);

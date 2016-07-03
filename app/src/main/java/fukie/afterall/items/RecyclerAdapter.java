@@ -32,20 +32,21 @@ import fukie.afterall.R;
  * Created by Fukie on 13/06/2016.
  */
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
-
     private List<Events> objects;
-    public Context mContext;
+    public static Context mContext;
     private HashSet<Integer> unfoldedIndexes = new HashSet<>();
-    static DatabaseProcess db;
-    public RecyclerAdapter(Context context, List<Events> cur) {
+    private static RecyclerViewClickListener itemListener;
+
+    public RecyclerAdapter() {}
+    public RecyclerAdapter(Context context, List<Events> cur, RecyclerViewClickListener listener) {
         mContext = context;
         objects = cur;
+        itemListener = listener;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        RecyclerAdapter recyclerAdapter;
-        public static Events listViewItem;
-        public static int position;
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public Events listViewItem;
+        private RecyclerAdapter recyclerAdapter = new RecyclerAdapter();
         TextView txtTitleName;
         TextView txtTitleCount;
         ImageView imgTitleEvent;
@@ -57,7 +58,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         TextView txtContentDiffDate;
         TextView txtContentCategory;
         ImageView imgContentEvent;
-        ImageView imgContentLoop;
         Button bttnContentModify;
         Button bttnContentDelete;
         TextView txtContentAnnual;
@@ -84,41 +84,26 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             this.bttnContentDelete.setOnClickListener(this);
             this.bttnContentModify.setOnClickListener(this);
         }
+
         @Override
         public void onClick(View v) {
             // TODO Auto-generated method stub
 
-            if(v == this.bttnContentDelete)
-            {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(recyclerAdapter.mContext);
-
-                dialog.setTitle("Warning")
-                        .setIcon(R.drawable.img_true)
-                        .setMessage("Delete Event?")
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialoginterface, int i) {
-                                dialoginterface.cancel();
-                            }
-                        })
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialoginterface, int i) {
-                                db = new DatabaseProcess(recyclerAdapter.mContext);
-                                db.deleteEvent(listViewItem.getId());
-                                recyclerAdapter.removeAt(position);
-                            }
-                        }).show();
+            if (v == this.bttnContentDelete) {
+                itemListener.recyclerViewListClicked(2, v, this.getLayoutPosition());
             }
 
-            if(v == this.bttnContentModify)
-            {
-                Intent intent = new Intent(MainActivity.context, AddingEventActivity.class);
-                intent.putExtra("id", listViewItem.getId());
-                intent.putExtra("name", listViewItem.getName());
-                intent.putExtra("loop", listViewItem.getLoop());
-                intent.putExtra("spinner", listViewItem.getKind() - 1);
-                intent.putExtra("date", listViewItem.getDate());
-                intent.putExtra("img", listViewItem.getImg());
-                MainActivity.context.startActivity(intent);
+            if (v == this.bttnContentModify) {
+                itemListener.recyclerViewListClicked(1, v, this.getLayoutPosition());
+//                Intent intent = new Intent(MainActivity.context, AddingEventActivity.class);
+//                intent.putExtra("id", listViewItem.getId());
+//                intent.putExtra("name", listViewItem.getName());
+//                intent.putExtra("loop", listViewItem.getLoop());
+//                intent.putExtra("spinner", listViewItem.getKind() - 1);
+//                intent.putExtra("date", listViewItem.getDate());
+//                intent.putExtra("img", listViewItem.getImg());
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                MainActivity.context.startActivity(intent);
             }
         }
     }
@@ -126,9 +111,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        final Events listViewItem = objects.get(position);
-        ViewHolder.listViewItem = objects.get(position);
-        ViewHolder.position = position;
+        Events listViewItem = objects.get(position);
+       // ViewHolder.listViewItem = objects.get(position);
         if (unfoldedIndexes.contains(position)) {
             ((FoldingCell) viewHolder.itemView).unfold(true);
         } else {
@@ -220,20 +204,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.imgContentEvent.setImageResource(Constants.background[listViewItem.getImg()]);
         if (listViewItem.getLoop() != 1)
             viewHolder.txtContentAnnual.setVisibility(View.INVISIBLE);
-
-//        viewHolder.bttnContentModify.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
-//
-//        viewHolder.bttnContentDelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -266,7 +236,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void removeAt(int position) {
         objects.remove(position);
         notifyItemRemoved(position);
-        notifyItemRangeRemoved(position, objects.size());
+       // notifyItemRangeRemoved(position, objects.size());
     }
 
 }
