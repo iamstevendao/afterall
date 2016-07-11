@@ -45,8 +45,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public Events listViewItem;
-        private RecyclerAdapter recyclerAdapter = new RecyclerAdapter();
         TextView txtTitleName;
         TextView txtTitleCount;
         ImageView imgTitleEvent;

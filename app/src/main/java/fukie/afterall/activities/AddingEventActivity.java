@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -130,19 +131,26 @@ public class AddingEventActivity extends AppCompatActivity {
                         .inflate(R.layout.add_name_layout, null, false);
 
                 mpopup = new PopupWindow(popUpView,
-                        (int) (displayRectangle.width() * 0.7f)
-                        , (int) (displayRectangle.height() * 0.4f)
+                        (int) (displayRectangle.width() * 0.8f)
+                        , (int) (displayRectangle.height() * 0.2f)
                         , true);
                 mpopup.setAnimationStyle(android.R.style.Animation_Dialog);
+                mpopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                 mpopup.showAtLocation(popUpView, Gravity.CENTER, 0, 0);
                 final EditText editText = (EditText) popUpView.findViewById(R.id.add_name_edit);
+                editText.setText(textName.getText());
+                editText.requestFocus();
                 Button cancel = (Button) popUpView.findViewById(R.id.add_name_close);
+
+//                WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+//                WindowManager.LayoutParams p = (WindowManager.LayoutParams) mpopup.getContentView().getParent().getParent();
+//                p.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+//                p.dimAmount = 0.3f;
+//                wm.updateViewLayout(popUpView, p);
                 cancel.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View arg0) {
-                        // to dismiss popup();
-                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                         mpopup.dismiss();
 
                     }
@@ -152,7 +160,6 @@ public class AddingEventActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         textName.setText(editText.getText());
-                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                         mpopup.dismiss();
                     }
                 });
@@ -160,11 +167,10 @@ public class AddingEventActivity extends AppCompatActivity {
 
                     @Override
                     public void onDismiss() {
-                        mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
                         mpopup.dismiss();
                     }
                 });
-                mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
+              //  mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
             }
         });
 
@@ -218,7 +224,7 @@ public class AddingEventActivity extends AppCompatActivity {
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
                 recyclerView.setAdapter(recyclerAdapter);
-                mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
+               // mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
 
                 recyclerView.addOnItemTouchListener(
                         new RecyclerItemClickListener(context
