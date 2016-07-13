@@ -11,16 +11,27 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 
 import com.melnykov.fab.FloatingActionButton;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.ArrayList;
@@ -57,11 +68,38 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     private static final String LAST_APP_VERSION = "last_app_version";
     int currentVersionCode;
 
+    private Drawer result = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplication().getApplicationContext();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("AfterAll");
+        result = new DrawerBuilder(this)
+                .withRootView(R.id.drawer_container)
+                .withToolbar(toolbar)
+                .withDisplayBelowStatusBar(false)
+                .withActionBarDrawerToggleAnimated(true)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName("hello"),
+                        new SecondaryDrawerItem().withName("hello2")
+                )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        if (drawerItem instanceof Nameable) {
+                            Toast.makeText(MainActivity.this
+                                    , ((Nameable) drawerItem).getName().getText(MainActivity.this)
+                                    , Toast.LENGTH_SHORT).show();
+                        }
+                        return false;
+                    }
+                })
+                .withSavedInstance(savedInstanceState)
+                .build();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
@@ -70,14 +108,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         databaseProcess = new DatabaseProcess(context);
 
+
         switch (checkAppStart()) {
             case NORMAL:
-                //databaseProcess.deleteAllItems();
-//                try {
-//                    databaseProcess.addExample();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
                 break;
             case FIRST_TIME_VERSION:
                 sharedPreferences.edit().putInt(LAST_APP_VERSION, currentVersionCode).apply();
@@ -94,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             default:
                 break;
         }
-        scheduleNotification(getNotification("5 second delay"), 5000);
+       // scheduleNotification(getNotification("5 second delay"), 5000);
 
         listViewItems = rearrangeList(databaseProcess.getAllEvent());
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems, this);
@@ -220,5 +253,40 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         builder.setContentText(content);
         builder.setSmallIcon(R.drawable.img_true);
         return builder.build();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //add the values which need to be saved from the drawer to the bundle
+        outState = result.saveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //handle the back press :D close the drawer first and if the drawer is closed close the activity
+        if (result != null && result.isDrawerOpen()) {
+            result.closeDrawer();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

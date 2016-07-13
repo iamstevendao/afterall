@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/menu_1"
+        android:orderInCategory="1"
+        android:title="Anniversary"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_2"
+        android:orderInCategory="2"
+        android:title="Education"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_3"
+        android:orderInCategory="3"
+        android:title="Job"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_4"
+        android:orderInCategory="4"
+        android:title="Life"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_5"
+        android:orderInCategory="5"
+        android:title="Trip"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_6"
+        android:orderInCategory="6"
+        android:title="Other"
+        app:showAsAction="never"/>
+</menu>
