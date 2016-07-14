@@ -1,17 +1,25 @@
 package fukie.afterall.activities;
 
+import android.Manifest;
+import android.accounts.AccountManager;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBarActivity;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -26,6 +34,23 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.melnykov.fab.FloatingActionButton;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
@@ -36,15 +61,14 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.ramotion.foldingcell.FoldingCell;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.TimeZone;
 
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
@@ -54,8 +78,21 @@ import fukie.afterall.R;
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener {
+public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener,
+        EasyPermissions.PermissionCallbacks {
+    GoogleAccountCredential mCredential;
+    ProgressDialog mProgress;
+
+    static final int REQUEST_ACCOUNT_PICKER = 1000;
+    static final int REQUEST_AUTHORIZATION = 1001;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+    private static final String[] SCOPES = {CalendarScopes.CALENDAR};
     // TextView txtHello;
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
@@ -84,22 +121,30 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("AfterAll");
+        mProgress = new ProgressDialog(this);
+        mProgress.setMessage("Calling Google Calendar API ...");
+
+        // Initialize credentials and service object.
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
         result = new DrawerBuilder(this)
                 .withRootView(R.id.drawer_container)
                 .withToolbar(toolbar)
                 .withDisplayBelowStatusBar(false)
                 .withActionBarDrawerToggleAnimated(true)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName("Sync")
+                        new PrimaryDrawerItem()
+                                .withName("Sync")
                                 .withDescription("hello")
                                 .withIcon(GoogleMaterial.Icon.gmd_refresh_sync)
-                                .withIdentifier(1)
-                                .withSelectable(false),
+                                .withIdentifier(1),
                         new DividerDrawerItem(),
                         new SwitchDrawerItem()
-                                .withName("Switch")
+                                .withName("Display")
                                 .withIcon(GoogleMaterial.Icon.gmd_calendar)
                                 .withChecked(true)
+                                .withDescription("Day Count")
                                 .withOnCheckedChangeListener(onCheckedChangeListener),
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem()
@@ -114,20 +159,35 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                                 .withName("Contact")
                                 .withIcon(GoogleMaterial.Icon.gmd_account)
                                 .withIdentifier(4)
-                        )
+                )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem instanceof Nameable) {
-                            Toast.makeText(MainActivity.this
-                                    , ((Nameable) drawerItem).getName().getText(MainActivity.this)
-                                    , Toast.LENGTH_SHORT).show();
+                        if (drawerItem != null) {
+                            switch ((int) drawerItem.getIdentifier()) {
+                                case 1:
+                                    getResultsFromApi();
+                                    break;
+                                case 2:
+                                    break;
+                                case 3:
+                                    break;
+                                case 4:
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                         return false;
                     }
                 })
                 .withSavedInstance(savedInstanceState)
                 .build();
+
+        if (savedInstanceState == null) {
+            result.setSelection(21, false);
+        }
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
@@ -175,16 +235,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                     }
                 })
         );
-
-
     }
 
     private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
-            if (drawerItem instanceof Nameable) {
+            if (isChecked) {
+                ((SwitchDrawerItem) drawerItem).withDescription("Day Count");
             } else {
+                ((SwitchDrawerItem) drawerItem).withDescription("Year, Month, Day");
             }
+            result.updateItem(drawerItem);
         }
     };
 
@@ -323,6 +384,284 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             result.closeDrawer();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private void getResultsFromApi() {
+        if (!isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            chooseAccount();
+        } else if (!isDeviceOnline()) {
+            Toast.makeText(MainActivity.this,
+                    "No network connection available.", Toast.LENGTH_LONG).show();
+        } else {
+            new MakeRequestTask(mCredential).execute();
+        }
+    }
+
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                this, Manifest.permission.GET_ACCOUNTS)) {
+            String accountName = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            if (accountName != null) {
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER);
+            }
+        } else {
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode != RESULT_OK) {
+
+                    Toast.makeText(MainActivity.this,
+                            "This app requires Google Play Services. Please install \" +\n" +
+                                    " \"Google Play Services on your device and relaunch this app."
+                            , Toast.LENGTH_LONG).show();
+
+                } else {
+                    getResultsFromApi();
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        getResultsFromApi();
+                    }
+                }
+                break;
+            case REQUEST_AUTHORIZATION:
+                if (resultCode == RESULT_OK) {
+                    getResultsFromApi();
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    private void acquireGooglePlayServices() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+        }
+    }
+
+    void showGooglePlayServicesAvailabilityErrorDialog(
+            final int connectionStatusCode) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
+                MainActivity.this,
+                connectionStatusCode,
+                REQUEST_GOOGLE_PLAY_SERVICES);
+        dialog.show();
+    }
+
+    private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
+        private com.google.api.services.calendar.Calendar mService = null;
+        private Exception mLastError = null;
+
+        public MakeRequestTask(GoogleAccountCredential credential) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("AfterAll")
+                    .build();
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            try {
+                return getDataFromApi();
+            } catch (Exception e) {
+                mLastError = e;
+                cancel(true);
+                return null;
+            }
+        }
+
+        private List<String> getDataFromApi() throws IOException {
+            //DateTime now = new DateTime(System.currentTimeMillis());
+            List<String> eventStrings = new ArrayList<>();
+
+            // Iterate through entries in calendar list
+            String pageToken = null;
+            String calID = "";
+            boolean isExisted = false;
+
+            do {
+                CalendarList calendarList = mService.calendarList().list()
+                        .setPageToken(pageToken).execute();
+                List<CalendarListEntry> items = calendarList.getItems();
+
+                for (CalendarListEntry calendarListEntry : items) {
+                    if (calendarListEntry.getSummary().equals("AfterAll")) {
+                        calID = calendarListEntry.getId();
+                        isExisted = true;
+                        break;
+                    }
+                }
+                pageToken = calendarList.getNextPageToken();
+            } while (pageToken != null);
+
+            if (!isExisted) {
+                com.google.api.services.calendar.model.Calendar calendar = new Calendar();
+                calendar.setSummary("AfterAll");
+                TimeZone tz = TimeZone.getDefault();
+                calendar.setTimeZone(tz.getID());
+                Calendar created = mService.calendars().insert(calendar).execute();
+                calID = created.getId();
+            }
+
+            Event event = new Event()
+                    .setSummary("Test2")
+                    .setLocation("1")
+                    .setDescription("Hello world");
+
+            DateTime startDateTime = new DateTime("2016-07-14");
+            EventDateTime start = new EventDateTime()
+                    .setDate(startDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setStart(start);
+
+            DateTime endDateTime = new DateTime("2016-07-15");
+            EventDateTime end = new EventDateTime()
+                    .setDate(endDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setEnd(end);
+
+            //    String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
+            //   event.setRecurrence(Arrays.asList(recurrence));
+
+            event = mService.events().insert(calID, event).execute();
+            System.out.printf("Event created: %s\n", event.getHtmlLink());
+
+            com.google.api.services.calendar.model.Events events = mService.events().list(calID)
+                    .setMaxResults(10)
+                    .setTimeMin(new DateTime("2011-06-03T10:00:00-07:00"))
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
+            List<Event> items = events.getItems();
+
+            for (Event eventx : items) {
+                DateTime startx = eventx.getStart().getDateTime();
+                if (startx == null) {
+                    startx = eventx.getStart().getDate();
+                }
+                System.out.println("*****:" + eventx.getSummary() + " " + eventx.getLocation()
+                        + " " + eventx.getDescription() + " " + startx.toString());
+                Toast.makeText(MainActivity.this
+                        , eventx.getSummary() + " " + eventx.getLocation() + " "
+                                + eventx.getDescription() + " " + startx.toString()
+                        , Toast.LENGTH_LONG)
+                        .show();
+                eventStrings.add(String.format("%s (%s)", eventx.getSummary(), startx));
+            }
+//
+            return eventStrings;
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+            mProgress.show();
+        }
+
+        @Override
+        protected void onPostExecute(List<String> output) {
+            mProgress.hide();
+            if (output == null || output.size() == 0) {
+                //  mOutputText.setText("No results returned.");
+            } else {
+                output.add(0, "Data retrieved using the Google Calendar API:");
+                //   mOutputText.setText(TextUtils.join("\n", output));
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            MainActivity.REQUEST_AUTHORIZATION);
+                } else {
+                    //  mOutputText.setText("The following error occurred:\n"
+                    //   + mLastError.getMessage());
+                }
+            } else {
+                //  mOutputText.setText("Request cancelled.");
+            }
         }
     }
 }
