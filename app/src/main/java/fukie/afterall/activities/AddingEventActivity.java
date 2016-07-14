@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -68,6 +71,7 @@ public class AddingEventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
         context = getApplication().getApplicationContext();
+        setTitle("Add Event");
         databaseProcess = new DatabaseProcess(MainActivity.context);
         textName = (TextView) findViewById(R.id.add_name);
         textDate = (TextView) findViewById(R.id.add_date);
@@ -240,6 +244,9 @@ public class AddingEventActivity extends AppCompatActivity {
                 );
             }
         });
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(false);
     }
 
     public void submitAddEvent(View target) throws Exception {
@@ -270,6 +277,52 @@ public class AddingEventActivity extends AppCompatActivity {
     }
 
     public void cancelAddEvent(View target) {
+        Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.add, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_1:
+                if (textName.getText().toString().length() > 0
+                        && textDate.getText().toString().length() > 0) {
+                    int loop = 0;
+                    if (toggleButton.isChecked()) {
+                        loop = 1;
+                    }
+                    if (!isFromIntent) {
+                        databaseProcess.insertEvent(textName.getText().toString(),
+                                spinnerCategory.getSelectedItemPosition() + 1,
+                                textDate.getText().toString(),
+                                loop,
+                                currentImage);
+                    } else {
+                        databaseProcess.modifyEvent(i.getIntExtra("id", -1)
+                                , textName.getText().toString()
+                                , spinnerCategory.getSelectedItemPosition() + 1
+                                , textDate.getText().toString()
+                                , loop
+                                , currentImage);
+                    }
+                    Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
         Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
         startActivity(intent);
     }

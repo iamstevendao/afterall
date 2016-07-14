@@ -22,14 +22,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 
 import com.melnykov.fab.FloatingActionButton;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.ramotion.foldingcell.FoldingCell;
@@ -50,7 +55,7 @@ import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener{
+public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener {
     // TextView txtHello;
     DatabaseProcess databaseProcess;
     RecyclerView lstEvent;
@@ -69,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     int currentVersionCode;
 
     private Drawer result = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,9 +90,31 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 .withDisplayBelowStatusBar(false)
                 .withActionBarDrawerToggleAnimated(true)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName("hello"),
-                        new SecondaryDrawerItem().withName("hello2")
-                )
+                        new PrimaryDrawerItem().withName("Sync")
+                                .withDescription("hello")
+                                .withIcon(GoogleMaterial.Icon.gmd_refresh_sync)
+                                .withIdentifier(1)
+                                .withSelectable(false),
+                        new DividerDrawerItem(),
+                        new SwitchDrawerItem()
+                                .withName("Switch")
+                                .withIcon(GoogleMaterial.Icon.gmd_calendar)
+                                .withChecked(true)
+                                .withOnCheckedChangeListener(onCheckedChangeListener),
+                        new DividerDrawerItem(),
+                        new SecondaryDrawerItem()
+                                .withName("Guide")
+                                .withIcon(GoogleMaterial.Icon.gmd_crop)
+                                .withIdentifier(2),
+                        new SecondaryDrawerItem()
+                                .withName("Information")
+                                .withIcon(GoogleMaterial.Icon.gmd_info)
+                                .withIdentifier(3),
+                        new SecondaryDrawerItem()
+                                .withName("Contact")
+                                .withIcon(GoogleMaterial.Icon.gmd_account)
+                                .withIdentifier(4)
+                        )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -108,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         databaseProcess = new DatabaseProcess(context);
 
-
         switch (checkAppStart()) {
             case NORMAL:
                 break;
@@ -127,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             default:
                 break;
         }
-       // scheduleNotification(getNotification("5 second delay"), 5000);
+        // scheduleNotification(getNotification("5 second delay"), 5000);
 
         listViewItems = rearrangeList(databaseProcess.getAllEvent());
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems, this);
@@ -152,23 +179,32 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     }
 
-    @Override
-    public void recyclerViewListClicked(int button, View v, int position){
-            if(button == 1) {
-                Events listViewItem = listViewItems.get(position);
-                Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
-                intent.putExtra("id", listViewItem.getId());
-                intent.putExtra("name", listViewItem.getName());
-                intent.putExtra("loop", listViewItem.getLoop());
-                intent.putExtra("spinner", listViewItem.getKind() - 1);
-                intent.putExtra("date", listViewItem.getDate());
-                intent.putExtra("img", listViewItem.getImg());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+    private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
+            if (drawerItem instanceof Nameable) {
             } else {
-                databaseProcess.deleteEvent(listViewItems.get(position).getId());
-                recyclerAdapter2.removeAt(position);
             }
+        }
+    };
+
+    @Override
+    public void recyclerViewListClicked(int button, View v, int position) {
+        if (button == 1) {
+            Events listViewItem = listViewItems.get(position);
+            Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
+            intent.putExtra("id", listViewItem.getId());
+            intent.putExtra("name", listViewItem.getName());
+            intent.putExtra("loop", listViewItem.getLoop());
+            intent.putExtra("spinner", listViewItem.getKind() - 1);
+            intent.putExtra("date", listViewItem.getDate());
+            intent.putExtra("img", listViewItem.getImg());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } else {
+            databaseProcess.deleteEvent(listViewItems.get(position).getId());
+            recyclerAdapter2.removeAt(position);
+        }
     }
 
     public void addEvent(View target) {
@@ -215,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 }
             }
         }
-        for(int i = 0; i< listViewItems.size(); i++){
+        for (int i = 0; i < listViewItems.size(); i++) {
             if (listViewItems.get(i).getDiff() > 0)
                 countPositive++;
             if (listViewItems.get(i).getDiff() == 0)
@@ -243,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
