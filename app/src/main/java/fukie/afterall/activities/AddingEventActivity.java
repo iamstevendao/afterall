@@ -107,7 +107,7 @@ public class AddingEventActivity extends AppCompatActivity {
             textDate.setText(i.getStringExtra("date"));
             imageBackground.setImageResource(Constants.background[i.getIntExtra("img", 0)]);
             spinnerCategory.setSelection(i.getIntExtra("spinner", 0));
-            if(i.getIntExtra("loop", -1) == 1)
+            if (i.getIntExtra("loop", -1) == 1)
                 toggleButton.setChecked(true);
         }
         categoryContainer.setBackgroundColor(ContextCompat.getColor(
@@ -174,7 +174,7 @@ public class AddingEventActivity extends AppCompatActivity {
                         mpopup.dismiss();
                     }
                 });
-              //  mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
+                //  mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
             }
         });
 
@@ -228,7 +228,7 @@ public class AddingEventActivity extends AppCompatActivity {
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
                 recyclerView.setAdapter(recyclerAdapter);
-               // mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
+                // mainContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.dim_color));
 
                 recyclerView.addOnItemTouchListener(
                         new RecyclerItemClickListener(context
@@ -249,32 +249,32 @@ public class AddingEventActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(false);
     }
 
-    public void submitAddEvent(View target) throws Exception {
-
-        if (textName.getText().toString().length() > 0
-                && textDate.getText().toString().length() > 0) {
-            int loop = 0;
-            if (toggleButton.isChecked()) {
-                loop = 1;
-            }
-            if (!isFromIntent) {
-                databaseProcess.insertEvent(textName.getText().toString(),
-                        spinnerCategory.getSelectedItemPosition() + 1,
-                        textDate.getText().toString(),
-                        loop,
-                        currentImage);
-            } else {
-                databaseProcess.modifyEvent(i.getIntExtra("id", -1)
-                        , textName.getText().toString()
-                        , spinnerCategory.getSelectedItemPosition() + 1
-                        , textDate.getText().toString()
-                        , loop
-                        , currentImage);
-            }
-            Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
-            startActivity(intent);
-        }
-    }
+//    public void submitAddEvent(View target) throws Exception {
+//
+//        if (textName.getText().toString().length() > 0
+//                && textDate.getText().toString().length() > 0) {
+//            int loop = 0;
+//            if (toggleButton.isChecked()) {
+//                loop = 1;
+//            }
+//            if (!isFromIntent) {
+//                databaseProcess.insertEvent(textName.getText().toString(),
+//                        spinnerCategory.getSelectedItemPosition() + 1,
+//                        textDate.getText().toString(),
+//                        loop,
+//                        currentImage);
+//            } else {
+//                databaseProcess.modifyEvent(i.getIntExtra("id", -1)
+//                        , textName.getText().toString()
+//                        , spinnerCategory.getSelectedItemPosition() + 1
+//                        , textDate.getText().toString()
+//                        , loop
+//                        , currentImage);
+//            }
+//            Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
+//            startActivity(intent);
+//        }
+//    }
 
     public void cancelAddEvent(View target) {
         Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
@@ -303,14 +303,18 @@ public class AddingEventActivity extends AppCompatActivity {
                                 spinnerCategory.getSelectedItemPosition() + 1,
                                 textDate.getText().toString(),
                                 loop,
-                                currentImage);
+                                currentImage
+                                , Constants.EVENT_STATE_WRITE
+                                , ""
+                                , 0);
                     } else {
                         databaseProcess.modifyEvent(i.getIntExtra("id", -1)
                                 , textName.getText().toString()
                                 , spinnerCategory.getSelectedItemPosition() + 1
                                 , textDate.getText().toString()
                                 , loop
-                                , currentImage);
+                                , currentImage
+                                , Constants.EVENT_STATE_WRITE);
                     }
                     Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
                     startActivity(intent);

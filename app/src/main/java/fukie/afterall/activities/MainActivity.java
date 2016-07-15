@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -64,14 +65,17 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.ramotion.foldingcell.FoldingCell;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
+import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
@@ -198,6 +202,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         switch (checkAppStart()) {
             case NORMAL:
+                databaseProcess.initializeFirstTime();
+                try {
+                    databaseProcess.addExample();
+                } catch (Exception e){
+
+                }
                 break;
             case FIRST_TIME_VERSION:
                 sharedPreferences.edit().putInt(LAST_APP_VERSION, currentVersionCode).apply();
@@ -216,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         }
         // scheduleNotification(getNotification("5 second delay"), 5000);
 
-        listViewItems = rearrangeList(databaseProcess.getAllEvent());
+        listViewItems = rearrangeList(databaseProcess.getAllEvent(-1));
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems, this);
         recyclerAdapter2 = recyclerAdapter;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
@@ -263,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } else {
-            databaseProcess.deleteEvent(listViewItems.get(position).getId());
+            databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
             recyclerAdapter2.removeAt(position);
         }
     }
@@ -546,6 +556,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         private List<String> getDataFromApi() throws IOException {
             //DateTime now = new DateTime(System.currentTimeMillis());
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             List<String> eventStrings = new ArrayList<>();
 
             // Iterate through entries in calendar list
@@ -559,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 List<CalendarListEntry> items = calendarList.getItems();
 
                 for (CalendarListEntry calendarListEntry : items) {
-                    if (calendarListEntry.getSummary().equals("AfterAll")) {
+                    if (calendarListEntry.getSummary().equals("AfterAllCal")) {
                         calID = calendarListEntry.getId();
                         isExisted = true;
                         break;
@@ -570,58 +582,132 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
             if (!isExisted) {
                 com.google.api.services.calendar.model.Calendar calendar = new Calendar();
-                calendar.setSummary("AfterAll");
+                calendar.setSummary("AfterAllCal");
                 TimeZone tz = TimeZone.getDefault();
                 calendar.setTimeZone(tz.getID());
                 Calendar created = mService.calendars().insert(calendar).execute();
                 calID = created.getId();
             }
-
-            Event event = new Event()
-                    .setSummary("Test2")
-                    .setLocation("1")
-                    .setDescription("Hello world");
-
-            DateTime startDateTime = new DateTime("2016-07-14");
-            EventDateTime start = new EventDateTime()
-                    .setDate(startDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setStart(start);
-
-            DateTime endDateTime = new DateTime("2016-07-15");
-            EventDateTime end = new EventDateTime()
-                    .setDate(endDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setEnd(end);
-
-            //    String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
-            //   event.setRecurrence(Arrays.asList(recurrence));
-
-            event = mService.events().insert(calID, event).execute();
-            System.out.printf("Event created: %s\n", event.getHtmlLink());
-
-            com.google.api.services.calendar.model.Events events = mService.events().list(calID)
-                    .setMaxResults(10)
-                    .setTimeMin(new DateTime("2011-06-03T10:00:00-07:00"))
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .execute();
-            List<Event> items = events.getItems();
-
-            for (Event eventx : items) {
-                DateTime startx = eventx.getStart().getDateTime();
-                if (startx == null) {
-                    startx = eventx.getStart().getDate();
+            //160715
+//            com.google.api.services.calendar.model.Events events = mService.events().list(calID)
+//                    .setMaxResults(100)
+//                    .setTimeMin(new DateTime("2011-06-03T10:00:00-07:00"))
+//                    .setOrderBy("startTime")
+//                    .setSingleEvents(true)
+//                    .execute();
+            pageToken = null;
+            com.google.api.services.calendar.model.Events events
+                    = mService.events().list(calID).setPageToken(pageToken).execute();
+            List<Event> eventCloud = events.getItems();
+            List<Events> eventLocal = databaseProcess.getAllEvent(-1);
+            do {
+                for (Event eventC : eventCloud) {
+                    boolean available = false;
+                    DateTime startx = eventC.getStart().getDate();
+                    for (Events eventL : eventLocal) {
+                        if (eventC.getId().equals(eventL.getIdSync())) {
+                            available = true;
+                            if (eventL.getState() == Constants.EVENT_STATE_READ) {
+                                databaseProcess.modifyEvent(eventL.getId()
+                                        , eventC.getSummary()
+                                        , Integer.parseInt(eventC.getKind())
+                                        , sdf.format(startx)
+                                        , Integer.parseInt(eventC.getLocation())
+                                        , Integer.parseInt(eventC.getDescription())
+                                        , Constants.EVENT_STATE_READ);
+                            }
+                            break;
+                        }
+                    }
+                    if (!available) {
+                        databaseProcess.insertEvent(eventC.getSummary()
+                                , Integer.parseInt(eventC.getKind())
+                                , sdf.format(startx)
+                                , Integer.parseInt(eventC.getLocation())
+                                , Integer.parseInt(eventC.getDescription())
+                                , Constants.EVENT_STATE_READ
+                                , eventC.getId()
+                                , 0);
+                    }
                 }
-                System.out.println("*****:" + eventx.getSummary() + " " + eventx.getLocation()
-                        + " " + eventx.getDescription() + " " + startx.toString());
-                Toast.makeText(MainActivity.this
-                        , eventx.getSummary() + " " + eventx.getLocation() + " "
-                                + eventx.getDescription() + " " + startx.toString()
-                        , Toast.LENGTH_LONG)
-                        .show();
-                eventStrings.add(String.format("%s (%s)", eventx.getSummary(), startx));
+                pageToken = events.getNextPageToken();
+            } while (pageToken != null);
+
+            for (Events eventL : eventLocal) {
+                if(eventL.getState() == Constants.EVENT_STATE_WRITE) {
+                    Event event = new Event()
+                            .setSummary(eventL.getName())
+                            .setLocation(String.valueOf(eventL.getLoop()))
+                            .setKind(String.valueOf(eventL.getKind()))
+                            .setDescription(String.valueOf(eventL.getImg()));
+
+                    DateTime startDateTime = new DateTime(eventL.getDate());
+                    EventDateTime start = new EventDateTime()
+                            .setDate(startDateTime)
+                            .setTimeZone(TimeZone.getDefault().getID());
+                    event.setStart(start);
+
+                    DateTime endDateTime = new DateTime(eventL.getDate());
+                    EventDateTime end = new EventDateTime()
+                            .setDate(endDateTime)
+                            .setTimeZone(TimeZone.getDefault().getID());
+                    event.setEnd(end);
+
+                    boolean available = false;
+                    for (Event eventC : eventCloud) {
+                        if (eventC.getId().equals(eventL.getIdSync())) {
+                            available = true;
+                            mService.events().update(calID, eventC.getId(), event).execute();
+                        }
+                    }
+                    if (!available) {
+                        event = mService.events().insert(calID, event).execute();
+                    }
+                    databaseProcess.updateStateAndSyncId(eventL.getId()
+                            , Constants.EVENT_STATE_READ
+                            , event.getId());
+                }
             }
+//            List<Event> items = events.getItems();
+//            for (Event eventx : items) {
+//                DateTime startx = eventx.getStart().getDateTime();
+//                if (startx == null) {
+//                    startx = eventx.getStart().getDate();
+//                }
+//                System.out.println("*****:" + eventx.getSummary() + " " + eventx.getLocation()
+//                        + " " + eventx.getDescription() + " " + startx.toString());
+//                Toast.makeText(MainActivity.this
+//                        , eventx.getSummary() + " " + eventx.getLocation() + " "
+//                                + eventx.getDescription() + " " + startx.toString()
+//                        , Toast.LENGTH_LONG)
+//                        .show();
+//                eventStrings.add(String.format("%s (%s)", eventx.getSummary(), startx));
+//            }
+
+//            Event event = new Event()
+//                    .setSummary("Test2")
+//                    .setLocation("1")
+//                    .setDescription("Hello world");
+//
+//            DateTime startDateTime = new DateTime("2016-07-14");
+//            EventDateTime start = new EventDateTime()
+//                    .setDate(startDateTime)
+//                    .setTimeZone(TimeZone.getDefault().getID());
+//            event.setStart(start);
+//
+//            DateTime endDateTime = new DateTime("2016-07-15");
+//            EventDateTime end = new EventDateTime()
+//                    .setDate(endDateTime)
+//                    .setTimeZone(TimeZone.getDefault().getID());
+//            event.setEnd(end);
+//
+//            //    String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
+//            //   event.setRecurrence(Arrays.asList(recurrence));
+//
+//            event = mService.events().insert(calID, event).execute();
+//            System.out.printf("Event created: %s\n", event.getId());
+
+
 //
             return eventStrings;
         }

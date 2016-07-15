@@ -18,6 +18,9 @@ public class Constants {
     public static final int EVENT_TRIP = 5;
     public static final int EVENT_OTHER = 6;
 
+    public static final int EVENT_STATE_WRITE = 0;
+    public static final int EVENT_STATE_READ = 1;
+
     public static final int COLOR_PINK = 1;
     public static final int COLOR_RED = 2;
     public static final int COLOR_BLUE = 3;
@@ -36,8 +39,11 @@ public class Constants {
     public static final String KIND_COLUMN_COLOR = "kind_color";
     public static final String EVENT_COLUMN_DATE = "event_date";
     public static final String EVENT_COLUMN_LOOP = "event_loop";
-    public static final String EVENT_COLUMN_NOTIFICATION = "event_notification";
+    //public static final String EVENT_COLUMN_NOTIFICATION = "event_notification";
     public static final String EVENT_COLUMN_IMAGE = "event_image";
+    public static final String EVENT_COLUMN_STATE = "event_state";
+    public static final String EVENT_COLUMN_ID_SYNC = "event_id_sync";
+    public static final String EVENT_COLUMN_DELETED = "event_deleted";
 
 
     // references to our images

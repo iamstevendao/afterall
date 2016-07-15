@@ -30,9 +30,12 @@ public class Events {
     private int diff;
     private int loop;
     private int img;
+    private int state;
+    private String idSync;
+    private int deleted;
 
     public Events(int id, String name, int kind, int color, String date
-            , int loop, int img) {
+            , int loop, int img, int state, String idSync, int deleted) {
         this.id = id;
         this.name = name;
         this.kind = kind;
@@ -40,6 +43,9 @@ public class Events {
         this.date = date;
         this.loop = loop;
         this.img = img;
+        this.state = state;
+        this.idSync = idSync;
+        this.deleted = deleted;
         try {
             this.diff = getDiffDate();
         } catch (Exception e) {
@@ -70,6 +76,18 @@ public class Events {
             diffDays++;
         }
         return diffDays;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public String getIdSync() {
+        return idSync;
+    }
+
+    public int getDeleted() {
+        return deleted;
     }
 
     public int getDiff() {
