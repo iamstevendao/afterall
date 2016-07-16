@@ -12,10 +12,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -34,24 +32,11 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.Calendar;
-import com.google.api.services.calendar.model.CalendarList;
-import com.google.api.services.calendar.model.CalendarListEntry;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.melnykov.fab.FloatingActionButton;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
@@ -64,18 +49,14 @@ import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.ramotion.foldingcell.FoldingCell;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
+import fukie.afterall.AsyncTask.MakeSyncTask;
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
-import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
@@ -91,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
-    static final int REQUEST_AUTHORIZATION = 1001;
+   public  static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
@@ -112,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     }
 
     private static final String LAST_APP_VERSION = "last_app_version";
+    private static final String IS_USE_SYNC = "is_use_sync";
     int currentVersionCode;
 
     private Drawer result = null;
@@ -202,10 +184,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         switch (checkAppStart()) {
             case NORMAL:
+                databaseProcess.dropAllTable();
+                databaseProcess = new DatabaseProcess(context);
                 databaseProcess.initializeFirstTime();
                 try {
                     databaseProcess.addExample();
-                } catch (Exception e){
+                } catch (Exception e) {
 
                 }
                 break;
@@ -220,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                     e.printStackTrace();
                 }
                 sharedPreferences.edit().putInt(LAST_APP_VERSION, currentVersionCode).apply();
+                sharedPreferences.edit().putBoolean(IS_USE_SYNC, false).apply();
                 break;
             default:
                 break;
@@ -328,15 +313,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             if (listViewItems.get(i).getDiff() == 0)
                 countZero++;
         }
-        List<Events> items = new ArrayList<>(listViewItems.size());
+        List<Events> items = new ArrayList<>();
         for (int i = countPositive; i < countPositive + countZero; i++) {
-            items.add(listViewItems.get(i));
+            if (listViewItems.get(i).getDeleted() == 0)
+                items.add(listViewItems.get(i));
         }
         for (int i = countPositive - 1; i > -1; i--) {
-            items.add(listViewItems.get(i));
+            if (listViewItems.get(i).getDeleted() == 0)
+                items.add(listViewItems.get(i));
         }
         for (int i = countPositive + countZero; i < listViewItems.size(); i++) {
-            items.add(listViewItems.get(i));
+            if (listViewItems.get(i).getDeleted() == 0)
+                items.add(listViewItems.get(i));
         }
         return items;
     }
@@ -382,6 +370,27 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.menu_main_0:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(-1)));
+                return true;
+            case R.id.menu_main_1:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(1)));
+                return true;
+            case R.id.menu_main_2:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(2)));
+                return true;
+            case R.id.menu_main_3:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(3)));
+                return true;
+            case R.id.menu_main_4:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(4)));
+                return true;
+            case R.id.menu_main_5:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(5)));
+                return true;
+            case R.id.menu_main_6:
+                recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(6)));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -406,7 +415,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             Toast.makeText(MainActivity.this,
                     "No network connection available.", Toast.LENGTH_LONG).show();
         } else {
-            new MakeRequestTask(mCredential).execute();
+            if (sharedPreferences.getBoolean(IS_USE_SYNC, false))
+                sharedPreferences.edit().putBoolean(IS_USE_SYNC, true).apply();
+            new MakeSyncTask(mCredential, mProgress).execute();
         }
     }
 
@@ -520,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         }
     }
 
-    void showGooglePlayServicesAvailabilityErrorDialog(
+    public void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         Dialog dialog = apiAvailability.getErrorDialog(
@@ -530,224 +541,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         dialog.show();
     }
 
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
-        private com.google.api.services.calendar.Calendar mService = null;
-        private Exception mLastError = null;
+    public void deleteEventCloud(String id){
+        if(isDeviceOnline()){
 
-        public MakeRequestTask(GoogleAccountCredential credential) {
-            HttpTransport transport = AndroidHttp.newCompatibleTransport();
-            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("AfterAll")
-                    .build();
-        }
-
-        @Override
-        protected List<String> doInBackground(Void... params) {
-            try {
-                return getDataFromApi();
-            } catch (Exception e) {
-                mLastError = e;
-                cancel(true);
-                return null;
-            }
-        }
-
-        private List<String> getDataFromApi() throws IOException {
-            //DateTime now = new DateTime(System.currentTimeMillis());
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            List<String> eventStrings = new ArrayList<>();
-
-            // Iterate through entries in calendar list
-            String pageToken = null;
-            String calID = "";
-            boolean isExisted = false;
-
-            do {
-                CalendarList calendarList = mService.calendarList().list()
-                        .setPageToken(pageToken).execute();
-                List<CalendarListEntry> items = calendarList.getItems();
-
-                for (CalendarListEntry calendarListEntry : items) {
-                    if (calendarListEntry.getSummary().equals("AfterAllCal")) {
-                        calID = calendarListEntry.getId();
-                        isExisted = true;
-                        break;
-                    }
-                }
-                pageToken = calendarList.getNextPageToken();
-            } while (pageToken != null);
-
-            if (!isExisted) {
-                com.google.api.services.calendar.model.Calendar calendar = new Calendar();
-                calendar.setSummary("AfterAllCal");
-                TimeZone tz = TimeZone.getDefault();
-                calendar.setTimeZone(tz.getID());
-                Calendar created = mService.calendars().insert(calendar).execute();
-                calID = created.getId();
-            }
-            //160715
-//            com.google.api.services.calendar.model.Events events = mService.events().list(calID)
-//                    .setMaxResults(100)
-//                    .setTimeMin(new DateTime("2011-06-03T10:00:00-07:00"))
-//                    .setOrderBy("startTime")
-//                    .setSingleEvents(true)
-//                    .execute();
-            pageToken = null;
-            com.google.api.services.calendar.model.Events events
-                    = mService.events().list(calID).setPageToken(pageToken).execute();
-            List<Event> eventCloud = events.getItems();
-            List<Events> eventLocal = databaseProcess.getAllEvent(-1);
-            do {
-                for (Event eventC : eventCloud) {
-                    boolean available = false;
-                    DateTime startx = eventC.getStart().getDate();
-                    for (Events eventL : eventLocal) {
-                        if (eventC.getId().equals(eventL.getIdSync())) {
-                            available = true;
-                            if (eventL.getState() == Constants.EVENT_STATE_READ) {
-                                databaseProcess.modifyEvent(eventL.getId()
-                                        , eventC.getSummary()
-                                        , Integer.parseInt(eventC.getKind())
-                                        , sdf.format(startx)
-                                        , Integer.parseInt(eventC.getLocation())
-                                        , Integer.parseInt(eventC.getDescription())
-                                        , Constants.EVENT_STATE_READ);
-                            }
-                            break;
-                        }
-                    }
-                    if (!available) {
-                        databaseProcess.insertEvent(eventC.getSummary()
-                                , Integer.parseInt(eventC.getKind())
-                                , sdf.format(startx)
-                                , Integer.parseInt(eventC.getLocation())
-                                , Integer.parseInt(eventC.getDescription())
-                                , Constants.EVENT_STATE_READ
-                                , eventC.getId()
-                                , 0);
-                    }
-                }
-                pageToken = events.getNextPageToken();
-            } while (pageToken != null);
-
-            for (Events eventL : eventLocal) {
-                if(eventL.getState() == Constants.EVENT_STATE_WRITE) {
-                    Event event = new Event()
-                            .setSummary(eventL.getName())
-                            .setLocation(String.valueOf(eventL.getLoop()))
-                            .setKind(String.valueOf(eventL.getKind()))
-                            .setDescription(String.valueOf(eventL.getImg()));
-
-                    DateTime startDateTime = new DateTime(eventL.getDate());
-                    EventDateTime start = new EventDateTime()
-                            .setDate(startDateTime)
-                            .setTimeZone(TimeZone.getDefault().getID());
-                    event.setStart(start);
-
-                    DateTime endDateTime = new DateTime(eventL.getDate());
-                    EventDateTime end = new EventDateTime()
-                            .setDate(endDateTime)
-                            .setTimeZone(TimeZone.getDefault().getID());
-                    event.setEnd(end);
-
-                    boolean available = false;
-                    for (Event eventC : eventCloud) {
-                        if (eventC.getId().equals(eventL.getIdSync())) {
-                            available = true;
-                            mService.events().update(calID, eventC.getId(), event).execute();
-                        }
-                    }
-                    if (!available) {
-                        event = mService.events().insert(calID, event).execute();
-                    }
-                    databaseProcess.updateStateAndSyncId(eventL.getId()
-                            , Constants.EVENT_STATE_READ
-                            , event.getId());
-                }
-            }
-//            List<Event> items = events.getItems();
-//            for (Event eventx : items) {
-//                DateTime startx = eventx.getStart().getDateTime();
-//                if (startx == null) {
-//                    startx = eventx.getStart().getDate();
-//                }
-//                System.out.println("*****:" + eventx.getSummary() + " " + eventx.getLocation()
-//                        + " " + eventx.getDescription() + " " + startx.toString());
-//                Toast.makeText(MainActivity.this
-//                        , eventx.getSummary() + " " + eventx.getLocation() + " "
-//                                + eventx.getDescription() + " " + startx.toString()
-//                        , Toast.LENGTH_LONG)
-//                        .show();
-//                eventStrings.add(String.format("%s (%s)", eventx.getSummary(), startx));
-//            }
-
-//            Event event = new Event()
-//                    .setSummary("Test2")
-//                    .setLocation("1")
-//                    .setDescription("Hello world");
-//
-//            DateTime startDateTime = new DateTime("2016-07-14");
-//            EventDateTime start = new EventDateTime()
-//                    .setDate(startDateTime)
-//                    .setTimeZone(TimeZone.getDefault().getID());
-//            event.setStart(start);
-//
-//            DateTime endDateTime = new DateTime("2016-07-15");
-//            EventDateTime end = new EventDateTime()
-//                    .setDate(endDateTime)
-//                    .setTimeZone(TimeZone.getDefault().getID());
-//            event.setEnd(end);
-//
-//            //    String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
-//            //   event.setRecurrence(Arrays.asList(recurrence));
-//
-//            event = mService.events().insert(calID, event).execute();
-//            System.out.printf("Event created: %s\n", event.getId());
-
-
-//
-            return eventStrings;
-        }
-
-
-        @Override
-        protected void onPreExecute() {
-            mProgress.show();
-        }
-
-        @Override
-        protected void onPostExecute(List<String> output) {
-            mProgress.hide();
-            if (output == null || output.size() == 0) {
-                //  mOutputText.setText("No results returned.");
-            } else {
-                output.add(0, "Data retrieved using the Google Calendar API:");
-                //   mOutputText.setText(TextUtils.join("\n", output));
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mProgress.hide();
-            if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            MainActivity.REQUEST_AUTHORIZATION);
-                } else {
-                    //  mOutputText.setText("The following error occurred:\n"
-                    //   + mLastError.getMessage());
-                }
-            } else {
-                //  mOutputText.setText("Request cancelled.");
-            }
         }
     }
 }

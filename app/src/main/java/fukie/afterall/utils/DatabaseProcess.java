@@ -75,11 +75,11 @@ public class DatabaseProcess {
     }
 
     public void addExample() throws Exception {
-        insertEvent("Yêu xa nhé!", 1, "2016-5-14", 0, 2, Constants.EVENT_STATE_WRITE, "", 0);
+        insertEvent("Yêu xa nhé!", 1, "2016-05-14", 0, 2, Constants.EVENT_STATE_WRITE, "", 0);
         insertEvent("Có!", 1, "2012-01-05", 0, 1, Constants.EVENT_STATE_WRITE, "", 0);
         insertEvent("Sinh Nhật Lợn", 5, "1995-02-05", 1, 3, Constants.EVENT_STATE_WRITE, "", 0);
-        insertEvent("Sinh Nhật Chó", 3, "1995-9-16", 1, 4, Constants.EVENT_STATE_WRITE, "", 0);
-        insertEvent("choi", 4, "2016-6-20", 0, 1, Constants.EVENT_STATE_WRITE, "", 0);
+        insertEvent("Sinh Nhật Chó", 3, "1995-09-16", 1, 4, Constants.EVENT_STATE_WRITE, "", 0);
+        insertEvent("choi", 4, "2016-06-20", 0, 1, Constants.EVENT_STATE_WRITE, "", 0);
     }
 
     public Cursor query(String query) {
@@ -92,6 +92,30 @@ public class DatabaseProcess {
         List<Events> events = new ArrayList<>();
         if (type == -1) {
             Cursor res = db.rawQuery("select * from event natural join kind", null);
+            res.moveToFirst();
+            try {
+                while (!res.isAfterLast()) {
+                    Events event = new Events(
+                            res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_ID))
+                            , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
+                            , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_ID))
+                            , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_COLOR))
+                            , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_DATE))
+                            , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP))
+                            , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_IMAGE))
+                            , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_STATE))
+                            , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_ID_SYNC))
+                            , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_DELETED)));
+                    events.add(event);
+                    res.moveToNext();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            res.close();
+        } else {
+            Cursor res = db.rawQuery("select * from event natural join kind where kind_id=" + type
+                    , null);
             res.moveToFirst();
             try {
                 while (!res.isAfterLast()) {

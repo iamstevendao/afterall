@@ -237,6 +237,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
        // notifyItemRangeRemoved(position, objects.size());
     }
 
+    public void updateData(List<Events> events){
+        objects.clear();
+        objects.addAll(events);
+        notifyDataSetChanged();
+    }
+
 }
 
 
