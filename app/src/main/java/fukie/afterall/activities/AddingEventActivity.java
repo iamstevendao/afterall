@@ -15,21 +15,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
@@ -38,14 +35,15 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
+import fukie.afterall.items.SyncTask;
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.ImageAdapter;
-import fukie.afterall.items.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.R;
 import fukie.afterall.items.SpinnerAdapter;
+import fukie.afterall.utils.Events;
 
 public class AddingEventActivity extends AppCompatActivity {
     DatabaseProcess databaseProcess;
@@ -65,6 +63,7 @@ public class AddingEventActivity extends AppCompatActivity {
     RelativeLayout backgroundHolder;
     boolean isFromIntent = false;
     Intent i;
+    MainActivity main;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -307,14 +306,22 @@ public class AddingEventActivity extends AppCompatActivity {
                                 , Constants.EVENT_STATE_WRITE
                                 , ""
                                 , 0);
+                        if (main.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                                && main.isDeviceOnline())
+                            new SyncTask(main.mCredential
+                                    , databaseProcess.getInsertedEvent()
+                                    , Constants.TASK_ADD);
                     } else {
-                        databaseProcess.modifyEvent(i.getIntExtra("id", -1)
+                        Events event = databaseProcess.modifyEvent(i.getIntExtra("id", -1)
                                 , textName.getText().toString()
                                 , spinnerCategory.getSelectedItemPosition() + 1
                                 , textDate.getText().toString()
                                 , loop
                                 , currentImage
                                 , Constants.EVENT_STATE_WRITE);
+                        if (main.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                                && main.isDeviceOnline())
+                            new SyncTask(main.mCredential, event, Constants.TASK_MODIFY);
                     }
                     Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
                     startActivity(intent);

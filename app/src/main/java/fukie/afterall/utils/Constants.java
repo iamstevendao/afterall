@@ -45,7 +45,10 @@ public class Constants {
     public static final String EVENT_COLUMN_ID_SYNC = "event_id_sync";
     public static final String EVENT_COLUMN_DELETED = "event_deleted";
 
-
+    public static final int TASK_SYNC = 0;
+    public static final int TASK_DELETE = 1;
+    public static final int TASK_MODIFY = 2;
+    public static final int TASK_ADD = 3;
     // references to our images
     public static Integer[] background = {
             R.drawable.bg2, R.drawable.bg1,

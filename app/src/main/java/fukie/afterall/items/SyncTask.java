@@ -1,4 +1,4 @@
-package fukie.afterall.AsyncTask;
+package fukie.afterall.items;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -19,7 +19,6 @@ import com.google.api.services.calendar.model.EventDateTime;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -32,40 +31,121 @@ import fukie.afterall.utils.Events;
 /**
  * Created by Fukie on 16/07/2016.
  */
-public class MakeSyncTask extends AsyncTask<Void, Void, List<String>> {
+public class SyncTask extends AsyncTask<Void, Void, Void> {
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
     DatabaseProcess databaseProcess = new DatabaseProcess(MainActivity.context);
-    ProgressDialog mProgress;
     MainActivity mainActivity;
+    ProgressDialog mProgress = new ProgressDialog(MainActivity.context);
+    HttpTransport transport = AndroidHttp.newCompatibleTransport();
+    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    int function;
+    String syncId;
+    int eventId;
+    Events eventL;
+    String calId;
 
-    public MakeSyncTask(GoogleAccountCredential credential, ProgressDialog mProgress) {
-        HttpTransport transport = AndroidHttp.newCompatibleTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    public SyncTask(GoogleAccountCredential credential) {
         mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, credential)
                 .setApplicationName("AfterAll")
                 .build();
-        this.mProgress = mProgress;
+        this.function = Constants.TASK_SYNC;
+    }
+
+    public SyncTask(GoogleAccountCredential credential, String syncId, int id) {
+        mService = new com.google.api.services.calendar.Calendar.Builder(
+                transport, jsonFactory, credential)
+                .setApplicationName("AfterAll")
+                .build();
+        this.function = Constants.TASK_DELETE;
+        this.syncId = syncId;
+        this.eventId = id;
+    }
+
+    public SyncTask(GoogleAccountCredential credential, Events event, int function) {
+        mService = new com.google.api.services.calendar.Calendar.Builder(
+                transport, jsonFactory, credential)
+                .setApplicationName("AfterAll")
+                .build();
+        this.eventL = event;
+        this.function = function;
     }
 
     @Override
-    protected List<String> doInBackground(Void... params) {
+    protected Void doInBackground(Void... params) {
         try {
-            return getDataFromApi();
+            switch (function) {
+                case Constants.TASK_SYNC:
+                    makeSync();
+                    break;
+                case Constants.TASK_DELETE:
+                    makeDelete();
+                    break;
+                case Constants.TASK_MODIFY:
+                    makeModify();
+                    break;
+                case Constants.TASK_ADD:
+                    makeAdd();
+                    break;
+            }
         } catch (Exception e) {
             mLastError = e;
             cancel(true);
-            return null;
         }
+        return null;
+    }
+    private void makeAdd() throws Exception{
+        Event event = new Event()
+                .setSummary(eventL.getName())
+                .setLocation(String.valueOf(eventL.getLoop()))
+                .setKind(String.valueOf(eventL.getKind()))
+                .setDescription(String.valueOf(eventL.getImg()));
+
+        DateTime startDateTime = new DateTime(eventL.getDate());
+        EventDateTime start = new EventDateTime()
+                .setDate(startDateTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        event.setStart(start);
+
+        DateTime endDateTime = new DateTime(eventL.getDate());
+        EventDateTime end = new EventDateTime()
+                .setDate(endDateTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        event.setEnd(end);
+
+        event = mService.events().insert(calId, event).execute();
+        syncId = event.getId();
+    }
+    private void makeDelete() throws Exception{
+        mService.events().delete(calId, syncId).execute();
     }
 
-    private List<String> getDataFromApi() throws IOException {
+    private void makeModify() throws Exception{
+        Event event = new Event()
+                .setSummary(eventL.getName())
+                .setLocation(String.valueOf(eventL.getLoop()))
+                .setKind(String.valueOf(eventL.getKind()))
+                .setDescription(String.valueOf(eventL.getImg()));
+
+        DateTime startDateTime = new DateTime(eventL.getDate());
+        EventDateTime start = new EventDateTime()
+                .setDate(startDateTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        event.setStart(start);
+
+        DateTime endDateTime = new DateTime(eventL.getDate());
+        EventDateTime end = new EventDateTime()
+                .setDate(endDateTime)
+                .setTimeZone(TimeZone.getDefault().getID());
+        event.setEnd(end);
+
+        mService.events().update(calId, eventL.getIdSync(), event).execute();
+    }
+
+    private void makeSync() throws IOException {
         //DateTime now = new DateTime(System.currentTimeMillis());
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        List<String> eventStrings = new ArrayList<>();
-
         // Iterate through entries in calendar list
         String pageToken = null;
         String calID = "";
@@ -95,6 +175,7 @@ public class MakeSyncTask extends AsyncTask<Void, Void, List<String>> {
             calID = created.getId();
         }
         //160715
+        this.calId = calID;
         pageToken = null;
         com.google.api.services.calendar.model.Events events
                 = mService.events().list(calID).setPageToken(pageToken).execute();
@@ -136,7 +217,6 @@ public class MakeSyncTask extends AsyncTask<Void, Void, List<String>> {
         for (Events eventL : eventLocal) {
             if (eventL.getState() == Constants.EVENT_STATE_WRITE) {
                 if (eventL.getDeleted() == 1) {
-                    //if(!eventL.getIdSync().equals(""))
                     mService.events().delete(calID, eventL.getIdSync()).execute();
                     databaseProcess.deleteEvent(eventL.getId());
                 } else {
@@ -174,24 +254,40 @@ public class MakeSyncTask extends AsyncTask<Void, Void, List<String>> {
                 }
             }
         }
-        return eventStrings;
     }
 
 
     @Override
     protected void onPreExecute() {
+        mProgress.setMessage("Syncing...");
         mProgress.show();
     }
 
     @Override
-    protected void onPostExecute(List<String> output) {
+    protected void onPostExecute(Void output) {
         mProgress.hide();
-        if (output == null || output.size() == 0) {
-            //  mOutputText.setText("No results returned.");
-        } else {
-            output.add(0, "Data retrieved using the Google Calendar API:");
-            //   mOutputText.setText(TextUtils.join("\n", output));
+        switch (function) {
+            case Constants.TASK_SYNC:
+                mainActivity.sharedPreferences.edit().putBoolean(MainActivity.IS_USE_SYNC, true).apply();
+                break;
+            case Constants.TASK_DELETE:
+                databaseProcess.deleteEvent(eventId);
+                break;
+            case Constants.TASK_MODIFY:
+                databaseProcess.updateState(eventL.getId());
+                break;
+            case Constants.TASK_ADD:
+                databaseProcess.updateStateAndSyncId(eventL.getId()
+                    , Constants.EVENT_STATE_READ
+                    , syncId);
+                break;
         }
+//        if (output == null || output.size() == 0) {
+//            //  mOutputText.setText("No results returned.");
+//        } else {
+//            output.add(0, "Data retrieved using the Google Calendar API:");
+//            //   mOutputText.setText(TextUtils.join("\n", output));
+//        }
     }
 
     @Override

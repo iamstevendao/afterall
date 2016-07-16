@@ -6,7 +6,6 @@ import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -54,7 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import fukie.afterall.AsyncTask.MakeSyncTask;
+import fukie.afterall.items.SyncTask;
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
 import fukie.afterall.utils.DatabaseProcess;
@@ -69,7 +68,6 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener,
         EasyPermissions.PermissionCallbacks {
     GoogleAccountCredential mCredential;
-    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
    public  static final int REQUEST_AUTHORIZATION = 1001;
@@ -85,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     public static Context context;
 
-    SharedPreferences sharedPreferences;
+   public SharedPreferences sharedPreferences;
     RecyclerAdapter recyclerAdapter2;
 
     public enum AppStart {
@@ -93,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     }
 
     private static final String LAST_APP_VERSION = "last_app_version";
-    private static final String IS_USE_SYNC = "is_use_sync";
+    public static final String IS_USE_SYNC = "is_use_sync";
     int currentVersionCode;
 
     private Drawer result = null;
@@ -107,8 +105,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("AfterAll");
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Calling Google Calendar API ...");
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
@@ -260,6 +256,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         } else {
             databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
             recyclerAdapter2.removeAt(position);
+            if(sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()){
+                new SyncTask(mCredential
+                        , listViewItems.get(position).getIdSync()
+                        , listViewItems.get(position).getId());
+            }
         }
     }
 
@@ -417,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         } else {
             if (sharedPreferences.getBoolean(IS_USE_SYNC, false))
                 sharedPreferences.edit().putBoolean(IS_USE_SYNC, true).apply();
-            new MakeSyncTask(mCredential, mProgress).execute();
+            new SyncTask(mCredential).execute();
         }
     }
 
@@ -506,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         // Do nothing.
     }
 
-    private boolean isDeviceOnline() {
+    public boolean isDeviceOnline() {
         ConnectivityManager connMgr =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
