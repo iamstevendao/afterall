@@ -6,6 +6,7 @@ import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -33,9 +35,21 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.melnykov.fab.FloatingActionButton;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
@@ -48,14 +62,16 @@ import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.ramotion.foldingcell.FoldingCell;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
-import fukie.afterall.items.SyncTask;
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
+import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
@@ -70,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     GoogleAccountCredential mCredential;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
-   public  static final int REQUEST_AUTHORIZATION = 1001;
+    public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
@@ -83,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     public static Context context;
 
-   public SharedPreferences sharedPreferences;
+    public SharedPreferences sharedPreferences;
     RecyclerAdapter recyclerAdapter2;
 
     public enum AppStart {
@@ -256,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         } else {
             databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
             recyclerAdapter2.removeAt(position);
-            if(sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()){
+            if (sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()) {
                 new SyncTask(mCredential
                         , listViewItems.get(position).getIdSync()
                         , listViewItems.get(position).getId());
@@ -542,9 +558,323 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         dialog.show();
     }
 
-    public void deleteEventCloud(String id){
-        if(isDeviceOnline()){
+    public void deleteEventCloud(String id) {
+        if (isDeviceOnline()) {
 
+        }
+    }
+
+    public void insertEventCloud(Context con) {
+        if (sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                && isDeviceOnline())
+            new SyncTask(mCredential, databaseProcess.getInsertedEvent(), Constants.TASK_ADD, con);
+    }
+
+    public void modifyEventCloud(Events event, Context con) {
+        if (sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                && isDeviceOnline())
+            new SyncTask(mCredential, event, Constants.TASK_MODIFY, con);
+    }
+
+    public class SyncTask extends AsyncTask<Void, Void, Void> {
+        private com.google.api.services.calendar.Calendar mService = null;
+        private Exception mLastError = null;
+        DatabaseProcess databaseProcess = new DatabaseProcess(context);
+        ProgressDialog mProgress;
+        HttpTransport transport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        int function;
+        String syncId;
+        int eventId;
+        Events eventL;
+        String calId;
+
+        public SyncTask(GoogleAccountCredential credential) {
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("AfterAll")
+                    .build();
+            this.function = Constants.TASK_SYNC;
+            mProgress = new ProgressDialog(MainActivity.this);
+        }
+
+        public SyncTask(GoogleAccountCredential credential, String syncId, int id) {
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("AfterAll")
+                    .build();
+            this.function = Constants.TASK_DELETE;
+            this.syncId = syncId;
+            this.eventId = id;
+            mProgress = new ProgressDialog(MainActivity.this);
+        }
+
+        public SyncTask(GoogleAccountCredential credential, Events event, int function, Context con) {
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("AfterAll")
+                    .build();
+            this.eventL = event;
+            this.function = function;
+            mProgress = new ProgressDialog(con);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                switch (function) {
+                    case Constants.TASK_SYNC:
+                        makeSync();
+                        break;
+                    case Constants.TASK_DELETE:
+                        makeDelete();
+                        break;
+                    case Constants.TASK_MODIFY:
+                        makeModify();
+                        break;
+                    case Constants.TASK_ADD:
+                        makeAdd();
+                        break;
+                }
+            } catch (Exception e) {
+                mLastError = e;
+                cancel(true);
+            }
+            return null;
+        }
+
+        private void makeAdd() throws Exception {
+            Event event = new Event()
+                    .setSummary(eventL.getName())
+                    .setLocation(String.valueOf(eventL.getLoop()) +
+                            String.valueOf(eventL.getKind()))
+                    .setDescription(String.valueOf(eventL.getImg()));
+
+            DateTime startDateTime = new DateTime(eventL.getDate());
+            EventDateTime start = new EventDateTime()
+                    .setDate(startDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setStart(start);
+
+            DateTime endDateTime = new DateTime(eventL.getDate());
+            EventDateTime end = new EventDateTime()
+                    .setDate(endDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setEnd(end);
+
+            event = mService.events().insert(calId, event).execute();
+            syncId = event.getId();
+        }
+
+        private void makeDelete() throws Exception {
+            mService.events().delete(calId, syncId).execute();
+        }
+
+        private void makeModify() throws Exception {
+            Event event = new Event()
+                    .setSummary(eventL.getName())
+                    .setLocation(String.valueOf(eventL.getLoop()) +
+                            String.valueOf(eventL.getKind()))
+                    .setDescription(String.valueOf(eventL.getImg()));
+
+            DateTime startDateTime = new DateTime(eventL.getDate());
+            EventDateTime start = new EventDateTime()
+                    .setDate(startDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setStart(start);
+
+            DateTime endDateTime = new DateTime(eventL.getDate());
+            EventDateTime end = new EventDateTime()
+                    .setDate(endDateTime)
+                    .setTimeZone(TimeZone.getDefault().getID());
+            event.setEnd(end);
+
+            mService.events().update(calId, eventL.getIdSync(), event).execute();
+        }
+
+        private void makeSync() throws IOException {
+            //DateTime now = new DateTime(System.currentTimeMillis());
+            // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            // Iterate through entries in calendar list
+            String pageToken = null;
+            String calID = "";
+            boolean isExisted = false;
+
+            do {
+                CalendarList calendarList = mService.calendarList().list()
+                        .setPageToken(pageToken).execute();
+                List<CalendarListEntry> items = calendarList.getItems();
+
+                for (CalendarListEntry calendarListEntry : items) {
+                    if (calendarListEntry.getSummary().equals("AfterAllCal")) {
+                        calID = calendarListEntry.getId();
+                        isExisted = true;
+                        break;
+                    }
+                }
+                pageToken = calendarList.getNextPageToken();
+            } while (pageToken != null);
+
+            if (!isExisted) {
+                com.google.api.services.calendar.model.Calendar calendar = new Calendar();
+                calendar.setSummary("AfterAllCal");
+                TimeZone tz = TimeZone.getDefault();
+                calendar.setTimeZone(tz.getID());
+                Calendar created = mService.calendars().insert(calendar).execute();
+                calID = created.getId();
+            }
+            //160715
+            this.calId = calID;
+            pageToken = null;
+            com.google.api.services.calendar.model.Events events
+                    = mService.events().list(calID).setPageToken(pageToken).execute();
+            List<Event> eventCloud = events.getItems();
+            List<Events> eventLocal = databaseProcess.getAllEvent(-1);
+            do {
+                for (Event eventC : eventCloud) {
+                    boolean available = false;
+                    DateTime startx = eventC.getStart().getDateTime();
+                    if (startx == null) {
+                        startx = eventC.getStart().getDate();
+                    }
+                    for (Events eventL : eventLocal) {
+                        if (eventC.getId().equals(eventL.getIdSync())) {
+                            available = true;
+                            if (eventL.getState() == Constants.EVENT_STATE_READ) {
+                                databaseProcess.modifyEvent(true
+                                        , eventL.getId()
+                                        , eventC.getSummary()
+                                        , Character.getNumericValue(eventC.getLocation().charAt(1))
+                                        , startx.toString()
+                                        , Character.getNumericValue(eventC.getLocation().charAt(0))
+                                        , Integer.parseInt(eventC.getDescription())
+                                        , Constants.EVENT_STATE_READ);
+                            }
+                            break;
+                        }
+                    }
+                    if (!available) {
+                        databaseProcess.insertEvent(eventC.getSummary()
+                                , Character.getNumericValue(eventC.getLocation().charAt(1))
+                                , startx.toString()
+                                , Character.getNumericValue(eventC.getLocation().charAt(0))
+                                , Integer.parseInt(eventC.getDescription())
+                                , Constants.EVENT_STATE_READ
+                                , eventC.getId()
+                                , 0);
+                    }
+                }
+                pageToken = events.getNextPageToken();
+            } while (pageToken != null);
+
+            for (Events eventL : eventLocal) {
+                if (eventL.getState() == Constants.EVENT_STATE_WRITE) {
+                    if (eventL.getDeleted() == 1) {
+                        mService.events().delete(calID, eventL.getIdSync()).execute();
+                        databaseProcess.deleteEvent(eventL.getId());
+                    } else {
+                        Event event = new Event()
+                                .setSummary(eventL.getName())
+                                .setLocation(String.valueOf(eventL.getLoop())
+                                        + String.valueOf(eventL.getKind()))
+                                .setDescription(String.valueOf(eventL.getImg()));
+
+                        DateTime startDateTime = new DateTime(eventL.getDate());
+                        EventDateTime start = new EventDateTime()
+                                .setDate(startDateTime)
+                                .setTimeZone(TimeZone.getDefault().getID());
+                        event.setStart(start);
+
+                        DateTime endDateTime = new DateTime(eventL.getDate());
+                        EventDateTime end = new EventDateTime()
+                                .setDate(endDateTime)
+                                .setTimeZone(TimeZone.getDefault().getID());
+                        event.setEnd(end);
+
+                        boolean available = false;
+                        for (Event eventC : eventCloud) {
+                            if (eventC.getId().equals(eventL.getIdSync())) {
+                                available = true;
+                                mService.events().update(calID, eventC.getId(), event).execute();
+                            }
+                        }
+                        if (!available) {
+                            event = mService.events().insert(calID, event).execute();
+                        }
+                        databaseProcess.updateStateAndSyncId(eventL.getId()
+                                , Constants.EVENT_STATE_READ
+                                , event.getId());
+                    }
+                } else {
+                    boolean deletedInCloud = true;
+                    for (Event eventC : eventCloud) {
+                        if (eventC.getId().equals(eventL.getIdSync())) {
+                            deletedInCloud = false;
+                            break;
+                        }
+                    }
+                    if (deletedInCloud) {
+                        databaseProcess.deleteEvent(eventL.getId());
+                    }
+                }
+            }
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+            mProgress.setMessage("Syncing...");
+            mProgress.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void output) {
+            switch (function) {
+                case Constants.TASK_SYNC:
+                    sharedPreferences.edit().putBoolean(MainActivity.IS_USE_SYNC, true).apply();
+                    break;
+                case Constants.TASK_DELETE:
+                    databaseProcess.deleteEvent(eventId);
+                    break;
+                case Constants.TASK_MODIFY:
+                    databaseProcess.updateState(eventL.getId());
+                    break;
+                case Constants.TASK_ADD:
+                    databaseProcess.updateStateAndSyncId(eventL.getId()
+                            , Constants.EVENT_STATE_READ
+                            , syncId);
+                    break;
+            }
+            List<Events> events = databaseProcess.getAllEvent(-1);
+            recyclerAdapter2.updateData(rearrangeList(events));
+            mProgress.hide();
+//        if (output == null || output.size() == 0) {
+//            //  mOutputText.setText("No results returned.");
+//        } else {
+//            output.add(0, "Data retrieved using the Google Calendar API:");
+//            //   mOutputText.setText(TextUtils.join("\n", output));
+//        }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            MainActivity.REQUEST_AUTHORIZATION);
+                } else {
+                    //  mOutputText.setText("The following error occurred:\n"
+                    //   + mLastError.getMessage());
+                }
+            } else {
+                //  mOutputText.setText("Request cancelled.");
+            }
         }
     }
 }

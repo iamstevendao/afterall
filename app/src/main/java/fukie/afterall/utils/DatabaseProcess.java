@@ -79,26 +79,29 @@ public class DatabaseProcess {
         return event;
     }
 
-    public Events modifyEvent(int id, String name, int kind, String date, int loop, int img
+    public Events modifyEvent(boolean isCloud, int id, String name, int kind, String date, int loop, int img
             , int state) {
         db.execSQL("UPDATE event SET event_name ='" + name + "', kind_id=" + kind
                 + ", event_date='" + date + "', event_loop=" + loop + ", event_image=" + img
                 + ", event_state= " + state + " WHERE event_id=" + id);
-        Cursor res = db.rawQuery("select * from event where event_id=" + id, null);
-        res.moveToFirst();
-        Events event =  new Events(
-                res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_ID))
-                , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
-                , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_ID))
-                , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_COLOR))
-                , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_DATE))
-                , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP))
-                , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_IMAGE))
-                , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_STATE))
-                , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_ID_SYNC))
-                , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_DELETED)));
-        res.close();
-        return event;
+        if(!isCloud) {
+            Cursor res =
+                    db.rawQuery("select * from event natural join kind where event_id=" + id, null);
+            res.moveToFirst();
+            Events event = new Events(
+                    res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_ID))
+                    , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_NAME))
+                    , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_ID))
+                    , res.getInt(res.getColumnIndex(Constants.KIND_COLUMN_COLOR))
+                    , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_DATE))
+                    , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_LOOP))
+                    , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_IMAGE))
+                    , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_STATE))
+                    , res.getString(res.getColumnIndex(Constants.EVENT_COLUMN_ID_SYNC))
+                    , res.getInt(res.getColumnIndex(Constants.EVENT_COLUMN_DELETED)));
+            res.close();
+            return event;
+        } else return null;
     }
 
     public void deleteWaitingEvent(int id) {

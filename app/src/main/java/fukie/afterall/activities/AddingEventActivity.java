@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-import fukie.afterall.items.SyncTask;
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.ImageAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
@@ -98,6 +97,7 @@ public class AddingEventActivity extends AppCompatActivity {
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         textDate.setText(sdf.format(today));
+        MainActivity mainActivity;
 
         i = getIntent();
         if (i.getStringExtra("name") != null) {
@@ -306,22 +306,19 @@ public class AddingEventActivity extends AppCompatActivity {
                                 , Constants.EVENT_STATE_WRITE
                                 , ""
                                 , 0);
-                        if (main.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
-                                && main.isDeviceOnline())
-                            new SyncTask(main.mCredential
-                                    , databaseProcess.getInsertedEvent()
-                                    , Constants.TASK_ADD);
+                            main.insertEventCloud(AddingEventActivity.this);
+
                     } else {
-                        Events event = databaseProcess.modifyEvent(i.getIntExtra("id", -1)
+                        Events event = databaseProcess.modifyEvent(false
+                                , i.getIntExtra("id", -1)
                                 , textName.getText().toString()
                                 , spinnerCategory.getSelectedItemPosition() + 1
                                 , textDate.getText().toString()
                                 , loop
                                 , currentImage
                                 , Constants.EVENT_STATE_WRITE);
-                        if (main.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
-                                && main.isDeviceOnline())
-                            new SyncTask(main.mCredential, event, Constants.TASK_MODIFY);
+
+                            main.modifyEventCloud(event, AddingEventActivity.this);
                     }
                     Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
                     startActivity(intent);
