@@ -61,7 +61,8 @@ public class DatabaseProcess {
 
     public Events getInsertedEvent() {
         Cursor res = db.rawQuery(
-                "select * from event where event_id=(select max(event_id) from event)"
+                "select * from event natural join kind where " +
+                        "event_id=(select max(event_id) from event)"
                 , null);
         res.moveToFirst();
         Events event =  new Events(

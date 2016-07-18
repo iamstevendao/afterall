@@ -2,6 +2,7 @@ package fukie.afterall.activities;
 
 import android.Manifest;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
@@ -71,6 +72,7 @@ import java.util.TimeZone;
 
 import fukie.afterall.items.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
+import fukie.afterall.items.SyncTask;
 import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
@@ -83,11 +85,11 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener,
         EasyPermissions.PermissionCallbacks {
-    GoogleAccountCredential mCredential;
+    public static GoogleAccountCredential mCredential;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     public static final int REQUEST_AUTHORIZATION = 1001;
-    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    public static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -98,9 +100,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     List<Events> listViewItems;
 
     public static Context context;
+    ProgressDialog progress;
 
-    public SharedPreferences sharedPreferences;
-    RecyclerAdapter recyclerAdapter2;
+    public static SharedPreferences sharedPreferences;
+    public static RecyclerAdapter recyclerAdapter2;
 
     public enum AppStart {
         FIRST_TIME, FIRST_TIME_VERSION, NORMAL
@@ -108,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     private static final String LAST_APP_VERSION = "last_app_version";
     public static final String IS_USE_SYNC = "is_use_sync";
+    public static final String CAL_ID = "cal_id";
     int currentVersionCode;
 
     private Drawer result = null;
@@ -121,11 +125,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("AfterAll");
+        progress = new ProgressDialog(MainActivity.this);
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+
         result = new DrawerBuilder(this)
                 .withRootView(R.id.drawer_container)
                 .withToolbar(toolbar)
@@ -134,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 .addDrawerItems(
                         new PrimaryDrawerItem()
                                 .withName("Sync")
-                                .withDescription("hello")
+                                .withDescription(mCredential.getSelectedAccountName())
                                 .withIcon(GoogleMaterial.Icon.gmd_refresh_sync)
                                 .withIdentifier(1),
                         new DividerDrawerItem(),
@@ -196,13 +202,22 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         switch (checkAppStart()) {
             case NORMAL:
-                databaseProcess.dropAllTable();
-                databaseProcess = new DatabaseProcess(context);
-                databaseProcess.initializeFirstTime();
-                try {
-                    databaseProcess.addExample();
-                } catch (Exception e) {
-
+//                databaseProcess.dropAllTable();
+//                databaseProcess = new DatabaseProcess(context);
+//                databaseProcess.initializeFirstTime();
+//                try {
+//                    databaseProcess.addExample();
+//                } catch (Exception e) {
+//
+//                }
+                if (sharedPreferences.getBoolean(IS_USE_SYNC, true)) {
+                    if (isDeviceOnline()) {
+                      //  new SyncTask(MainActivity.this).execute();
+                        getResultsFromApi();
+                        PrimaryDrawerItem a = ((PrimaryDrawerItem) result.getDrawerItem(1))
+                                .withDescription(mCredential.getSelectedAccountName());
+                        result.updateItem(a);
+                    }
                 }
                 break;
             case FIRST_TIME_VERSION:
@@ -222,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 break;
         }
         // scheduleNotification(getNotification("5 second delay"), 5000);
-
         listViewItems = rearrangeList(databaseProcess.getAllEvent(-1));
         final RecyclerAdapter recyclerAdapter = new RecyclerAdapter(this, listViewItems, this);
         recyclerAdapter2 = recyclerAdapter;
@@ -257,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     };
 
     @Override
-    public void recyclerViewListClicked(int button, View v, int position) {
+    public void recyclerViewListClicked(int button, View v, final int position) {
         if (button == 1) {
             Events listViewItem = listViewItems.get(position);
             Intent intent = new Intent(MainActivity.this, AddingEventActivity.class);
@@ -273,9 +287,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
             recyclerAdapter2.removeAt(position);
             if (sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()) {
-                new SyncTask(mCredential
-                        , listViewItems.get(position).getIdSync()
-                        , listViewItems.get(position).getId());
+                new SyncTask(listViewItems.get(position).getIdSync()
+                        , listViewItems.get(position).getId(), MainActivity.this).execute();
             }
         }
     }
@@ -312,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         }
     }
 
-    private List<Events> rearrangeList(List<Events> listViewItems) {
+    public static List<Events> rearrangeList(List<Events> listViewItems) {
         int countPositive = 0;
         int countZero = 0;
         for (int i = 0; i < listViewItems.size() - 1; i++) {
@@ -434,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         } else {
             if (sharedPreferences.getBoolean(IS_USE_SYNC, false))
                 sharedPreferences.edit().putBoolean(IS_USE_SYNC, true).apply();
-            new SyncTask(mCredential).execute();
+            new SyncTask(MainActivity.this).execute();
         }
     }
 
@@ -561,320 +574,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     public void deleteEventCloud(String id) {
         if (isDeviceOnline()) {
 
-        }
-    }
-
-    public void insertEventCloud(Context con) {
-        if (sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
-                && isDeviceOnline())
-            new SyncTask(mCredential, databaseProcess.getInsertedEvent(), Constants.TASK_ADD, con);
-    }
-
-    public void modifyEventCloud(Events event, Context con) {
-        if (sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
-                && isDeviceOnline())
-            new SyncTask(mCredential, event, Constants.TASK_MODIFY, con);
-    }
-
-    public class SyncTask extends AsyncTask<Void, Void, Void> {
-        private com.google.api.services.calendar.Calendar mService = null;
-        private Exception mLastError = null;
-        DatabaseProcess databaseProcess = new DatabaseProcess(context);
-        ProgressDialog mProgress;
-        HttpTransport transport = AndroidHttp.newCompatibleTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        int function;
-        String syncId;
-        int eventId;
-        Events eventL;
-        String calId;
-
-        public SyncTask(GoogleAccountCredential credential) {
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("AfterAll")
-                    .build();
-            this.function = Constants.TASK_SYNC;
-            mProgress = new ProgressDialog(MainActivity.this);
-        }
-
-        public SyncTask(GoogleAccountCredential credential, String syncId, int id) {
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("AfterAll")
-                    .build();
-            this.function = Constants.TASK_DELETE;
-            this.syncId = syncId;
-            this.eventId = id;
-            mProgress = new ProgressDialog(MainActivity.this);
-        }
-
-        public SyncTask(GoogleAccountCredential credential, Events event, int function, Context con) {
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("AfterAll")
-                    .build();
-            this.eventL = event;
-            this.function = function;
-            mProgress = new ProgressDialog(con);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                switch (function) {
-                    case Constants.TASK_SYNC:
-                        makeSync();
-                        break;
-                    case Constants.TASK_DELETE:
-                        makeDelete();
-                        break;
-                    case Constants.TASK_MODIFY:
-                        makeModify();
-                        break;
-                    case Constants.TASK_ADD:
-                        makeAdd();
-                        break;
-                }
-            } catch (Exception e) {
-                mLastError = e;
-                cancel(true);
-            }
-            return null;
-        }
-
-        private void makeAdd() throws Exception {
-            Event event = new Event()
-                    .setSummary(eventL.getName())
-                    .setLocation(String.valueOf(eventL.getLoop()) +
-                            String.valueOf(eventL.getKind()))
-                    .setDescription(String.valueOf(eventL.getImg()));
-
-            DateTime startDateTime = new DateTime(eventL.getDate());
-            EventDateTime start = new EventDateTime()
-                    .setDate(startDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setStart(start);
-
-            DateTime endDateTime = new DateTime(eventL.getDate());
-            EventDateTime end = new EventDateTime()
-                    .setDate(endDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setEnd(end);
-
-            event = mService.events().insert(calId, event).execute();
-            syncId = event.getId();
-        }
-
-        private void makeDelete() throws Exception {
-            mService.events().delete(calId, syncId).execute();
-        }
-
-        private void makeModify() throws Exception {
-            Event event = new Event()
-                    .setSummary(eventL.getName())
-                    .setLocation(String.valueOf(eventL.getLoop()) +
-                            String.valueOf(eventL.getKind()))
-                    .setDescription(String.valueOf(eventL.getImg()));
-
-            DateTime startDateTime = new DateTime(eventL.getDate());
-            EventDateTime start = new EventDateTime()
-                    .setDate(startDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setStart(start);
-
-            DateTime endDateTime = new DateTime(eventL.getDate());
-            EventDateTime end = new EventDateTime()
-                    .setDate(endDateTime)
-                    .setTimeZone(TimeZone.getDefault().getID());
-            event.setEnd(end);
-
-            mService.events().update(calId, eventL.getIdSync(), event).execute();
-        }
-
-        private void makeSync() throws IOException {
-            //DateTime now = new DateTime(System.currentTimeMillis());
-            // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            // Iterate through entries in calendar list
-            String pageToken = null;
-            String calID = "";
-            boolean isExisted = false;
-
-            do {
-                CalendarList calendarList = mService.calendarList().list()
-                        .setPageToken(pageToken).execute();
-                List<CalendarListEntry> items = calendarList.getItems();
-
-                for (CalendarListEntry calendarListEntry : items) {
-                    if (calendarListEntry.getSummary().equals("AfterAllCal")) {
-                        calID = calendarListEntry.getId();
-                        isExisted = true;
-                        break;
-                    }
-                }
-                pageToken = calendarList.getNextPageToken();
-            } while (pageToken != null);
-
-            if (!isExisted) {
-                com.google.api.services.calendar.model.Calendar calendar = new Calendar();
-                calendar.setSummary("AfterAllCal");
-                TimeZone tz = TimeZone.getDefault();
-                calendar.setTimeZone(tz.getID());
-                Calendar created = mService.calendars().insert(calendar).execute();
-                calID = created.getId();
-            }
-            //160715
-            this.calId = calID;
-            pageToken = null;
-            com.google.api.services.calendar.model.Events events
-                    = mService.events().list(calID).setPageToken(pageToken).execute();
-            List<Event> eventCloud = events.getItems();
-            List<Events> eventLocal = databaseProcess.getAllEvent(-1);
-            do {
-                for (Event eventC : eventCloud) {
-                    boolean available = false;
-                    DateTime startx = eventC.getStart().getDateTime();
-                    if (startx == null) {
-                        startx = eventC.getStart().getDate();
-                    }
-                    for (Events eventL : eventLocal) {
-                        if (eventC.getId().equals(eventL.getIdSync())) {
-                            available = true;
-                            if (eventL.getState() == Constants.EVENT_STATE_READ) {
-                                databaseProcess.modifyEvent(true
-                                        , eventL.getId()
-                                        , eventC.getSummary()
-                                        , Character.getNumericValue(eventC.getLocation().charAt(1))
-                                        , startx.toString()
-                                        , Character.getNumericValue(eventC.getLocation().charAt(0))
-                                        , Integer.parseInt(eventC.getDescription())
-                                        , Constants.EVENT_STATE_READ);
-                            }
-                            break;
-                        }
-                    }
-                    if (!available) {
-                        databaseProcess.insertEvent(eventC.getSummary()
-                                , Character.getNumericValue(eventC.getLocation().charAt(1))
-                                , startx.toString()
-                                , Character.getNumericValue(eventC.getLocation().charAt(0))
-                                , Integer.parseInt(eventC.getDescription())
-                                , Constants.EVENT_STATE_READ
-                                , eventC.getId()
-                                , 0);
-                    }
-                }
-                pageToken = events.getNextPageToken();
-            } while (pageToken != null);
-
-            for (Events eventL : eventLocal) {
-                if (eventL.getState() == Constants.EVENT_STATE_WRITE) {
-                    if (eventL.getDeleted() == 1) {
-                        mService.events().delete(calID, eventL.getIdSync()).execute();
-                        databaseProcess.deleteEvent(eventL.getId());
-                    } else {
-                        Event event = new Event()
-                                .setSummary(eventL.getName())
-                                .setLocation(String.valueOf(eventL.getLoop())
-                                        + String.valueOf(eventL.getKind()))
-                                .setDescription(String.valueOf(eventL.getImg()));
-
-                        DateTime startDateTime = new DateTime(eventL.getDate());
-                        EventDateTime start = new EventDateTime()
-                                .setDate(startDateTime)
-                                .setTimeZone(TimeZone.getDefault().getID());
-                        event.setStart(start);
-
-                        DateTime endDateTime = new DateTime(eventL.getDate());
-                        EventDateTime end = new EventDateTime()
-                                .setDate(endDateTime)
-                                .setTimeZone(TimeZone.getDefault().getID());
-                        event.setEnd(end);
-
-                        boolean available = false;
-                        for (Event eventC : eventCloud) {
-                            if (eventC.getId().equals(eventL.getIdSync())) {
-                                available = true;
-                                mService.events().update(calID, eventC.getId(), event).execute();
-                            }
-                        }
-                        if (!available) {
-                            event = mService.events().insert(calID, event).execute();
-                        }
-                        databaseProcess.updateStateAndSyncId(eventL.getId()
-                                , Constants.EVENT_STATE_READ
-                                , event.getId());
-                    }
-                } else {
-                    boolean deletedInCloud = true;
-                    for (Event eventC : eventCloud) {
-                        if (eventC.getId().equals(eventL.getIdSync())) {
-                            deletedInCloud = false;
-                            break;
-                        }
-                    }
-                    if (deletedInCloud) {
-                        databaseProcess.deleteEvent(eventL.getId());
-                    }
-                }
-            }
-        }
-
-
-        @Override
-        protected void onPreExecute() {
-            mProgress.setMessage("Syncing...");
-            mProgress.show();
-        }
-
-        @Override
-        protected void onPostExecute(Void output) {
-            switch (function) {
-                case Constants.TASK_SYNC:
-                    sharedPreferences.edit().putBoolean(MainActivity.IS_USE_SYNC, true).apply();
-                    break;
-                case Constants.TASK_DELETE:
-                    databaseProcess.deleteEvent(eventId);
-                    break;
-                case Constants.TASK_MODIFY:
-                    databaseProcess.updateState(eventL.getId());
-                    break;
-                case Constants.TASK_ADD:
-                    databaseProcess.updateStateAndSyncId(eventL.getId()
-                            , Constants.EVENT_STATE_READ
-                            , syncId);
-                    break;
-            }
-            List<Events> events = databaseProcess.getAllEvent(-1);
-            recyclerAdapter2.updateData(rearrangeList(events));
-            mProgress.hide();
-//        if (output == null || output.size() == 0) {
-//            //  mOutputText.setText("No results returned.");
-//        } else {
-//            output.add(0, "Data retrieved using the Google Calendar API:");
-//            //   mOutputText.setText(TextUtils.join("\n", output));
-//        }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mProgress.hide();
-            if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            MainActivity.REQUEST_AUTHORIZATION);
-                } else {
-                    //  mOutputText.setText("The following error occurred:\n"
-                    //   + mLastError.getMessage());
-                }
-            } else {
-                //  mOutputText.setText("Request cancelled.");
-            }
         }
     }
 }

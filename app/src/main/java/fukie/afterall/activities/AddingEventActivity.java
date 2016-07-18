@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,6 +40,7 @@ import java.util.Random;
 import fukie.afterall.items.DividerItemDecoration;
 import fukie.afterall.items.ImageAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
+import fukie.afterall.items.SyncTask;
 import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.R;
@@ -62,7 +65,7 @@ public class AddingEventActivity extends AppCompatActivity {
     RelativeLayout backgroundHolder;
     boolean isFromIntent = false;
     Intent i;
-    MainActivity main;
+    MainActivity main = new MainActivity();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,33 +251,6 @@ public class AddingEventActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(false);
     }
 
-//    public void submitAddEvent(View target) throws Exception {
-//
-//        if (textName.getText().toString().length() > 0
-//                && textDate.getText().toString().length() > 0) {
-//            int loop = 0;
-//            if (toggleButton.isChecked()) {
-//                loop = 1;
-//            }
-//            if (!isFromIntent) {
-//                databaseProcess.insertEvent(textName.getText().toString(),
-//                        spinnerCategory.getSelectedItemPosition() + 1,
-//                        textDate.getText().toString(),
-//                        loop,
-//                        currentImage);
-//            } else {
-//                databaseProcess.modifyEvent(i.getIntExtra("id", -1)
-//                        , textName.getText().toString()
-//                        , spinnerCategory.getSelectedItemPosition() + 1
-//                        , textDate.getText().toString()
-//                        , loop
-//                        , currentImage);
-//            }
-//            Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
-//            startActivity(intent);
-//        }
-//    }
-
     public void cancelAddEvent(View target) {
         Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
         startActivity(intent);
@@ -306,7 +282,11 @@ public class AddingEventActivity extends AppCompatActivity {
                                 , Constants.EVENT_STATE_WRITE
                                 , ""
                                 , 0);
-                            main.insertEventCloud(AddingEventActivity.this);
+                        if (MainActivity.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                                && isDeviceOnline())
+                            new SyncTask(databaseProcess.getInsertedEvent()
+                                    , Constants.TASK_ADD
+                                    , AddingEventActivity.this).execute();
 
                     } else {
                         Events event = databaseProcess.modifyEvent(false
@@ -318,7 +298,11 @@ public class AddingEventActivity extends AppCompatActivity {
                                 , currentImage
                                 , Constants.EVENT_STATE_WRITE);
 
-                            main.modifyEventCloud(event, AddingEventActivity.this);
+                        if (MainActivity.sharedPreferences.getBoolean(MainActivity.IS_USE_SYNC, false)
+                                && isDeviceOnline())
+                            new SyncTask(event
+                                    , Constants.TASK_MODIFY
+                                    , AddingEventActivity.this).execute();
                     }
                     Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
                     startActivity(intent);
@@ -327,6 +311,13 @@ public class AddingEventActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
     }
 
     @Override
