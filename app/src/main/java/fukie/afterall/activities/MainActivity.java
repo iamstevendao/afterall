@@ -131,7 +131,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-
+        mCredential.setSelectedAccountName(getPreferences(Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null));
         result = new DrawerBuilder(this)
                 .withRootView(R.id.drawer_container)
                 .withToolbar(toolbar)
@@ -202,21 +203,24 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         switch (checkAppStart()) {
             case NORMAL:
-//                databaseProcess.dropAllTable();
-//                databaseProcess = new DatabaseProcess(context);
-//                databaseProcess.initializeFirstTime();
-//                try {
-//                    databaseProcess.addExample();
-//                } catch (Exception e) {
+                Intent i = getIntent();
+                if(i.getIntExtra("fromAddingEvent", 0) == 0) {
+//                    databaseProcess.dropAllTable();
+//                    databaseProcess = new DatabaseProcess(context);
+//                    databaseProcess.initializeFirstTime();
+//                    try {
+//                        databaseProcess.addExample();
+//                    } catch (Exception e) {
 //
-//                }
-                if (sharedPreferences.getBoolean(IS_USE_SYNC, true)) {
-                    if (isDeviceOnline()) {
-                      //  new SyncTask(MainActivity.this).execute();
-                        getResultsFromApi();
-                        PrimaryDrawerItem a = ((PrimaryDrawerItem) result.getDrawerItem(1))
-                                .withDescription(mCredential.getSelectedAccountName());
-                        result.updateItem(a);
+//                    }
+                    if (sharedPreferences.getBoolean(IS_USE_SYNC, true)) {
+                        if (isDeviceOnline()) {
+                            //  new SyncTask(MainActivity.this).execute();
+                            getResultsFromApi();
+                            PrimaryDrawerItem a = ((PrimaryDrawerItem) result.getDrawerItem(1))
+                                    .withDescription(mCredential.getSelectedAccountName());
+                            result.updateItem(a);
+                        }
                     }
                 }
                 break;
@@ -285,11 +289,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             context.startActivity(intent);
         } else {
             databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
-            recyclerAdapter2.removeAt(position);
             if (sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()) {
                 new SyncTask(listViewItems.get(position).getIdSync()
-                        , listViewItems.get(position).getId(), MainActivity.this).execute();
+                        , listViewItems.get(position).getName()
+                        , MainActivity.this).execute();
             }
+            listViewItems = recyclerAdapter2.removeAt(position);
         }
     }
 

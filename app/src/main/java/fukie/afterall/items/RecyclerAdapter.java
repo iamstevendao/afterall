@@ -231,9 +231,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         unfoldedIndexes.add(position);
     }
 
-    public void removeAt(int position) {
+    public List<Events> removeAt(int position) {
         objects.remove(position);
         notifyItemRemoved(position);
+        return objects;
        // notifyItemRangeRemoved(position, objects.size());
     }
 

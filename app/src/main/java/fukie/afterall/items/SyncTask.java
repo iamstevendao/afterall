@@ -3,13 +3,11 @@ package fukie.afterall.items;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.HttpTransport;
@@ -42,7 +40,6 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
     int function;
     String syncId;
-    int eventId;
     Events eventL;
     static String calId;
     Activity activity;
@@ -53,10 +50,9 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
         this.activity = activity;
     }
 
-    public SyncTask(String syncId, int id, Activity activity) {
+    public SyncTask(String syncId, String name, Activity activity) {
         this.function = Constants.TASK_DELETE;
         this.syncId = syncId;
-        this.eventId = id;
         this.activity = activity;
     }
 
@@ -219,7 +215,12 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
         for (Events eventL : eventLocal) {
             if (eventL.getState() == Constants.EVENT_STATE_WRITE) {
                 if (eventL.getDeleted() == 1) {
-                    mService.events().delete(calID, eventL.getIdSync()).execute();
+                    for (Event eventC : eventCloud) {
+                        if (eventC.getId().equals(eventL.getIdSync())) {
+                            mService.events().delete(calID, eventL.getIdSync()).execute();
+                            break;
+                        }
+                    }
                     databaseProcess.deleteEvent(eventL.getId());
                 } else {
                     Event event = new Event()

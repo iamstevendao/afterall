@@ -100,7 +100,6 @@ public class AddingEventActivity extends AppCompatActivity {
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         textDate.setText(sdf.format(today));
-        MainActivity mainActivity;
 
         i = getIntent();
         if (i.getStringExtra("name") != null) {
@@ -305,6 +304,7 @@ public class AddingEventActivity extends AppCompatActivity {
                                     , AddingEventActivity.this).execute();
                     }
                     Intent intent = new Intent(AddingEventActivity.this, MainActivity.class);
+                    intent.putExtra("fromAddingEvent", 1);
                     startActivity(intent);
                 }
                 return true;
