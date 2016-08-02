@@ -7,7 +7,7 @@
     <ImageView
         android:id="@+id/title_image_event"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:contentDescription="image"
         android:scaleType="centerCrop"
         android:src="@drawable/bg4" />

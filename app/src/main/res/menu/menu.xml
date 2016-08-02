@@ -18,6 +18,6 @@
         android:id="@+id/action_user"
         android:orderInCategory="300"
         android:title="DONE"
-        app:showAsAction="ifRoom"></item>
+        app:showAsAction="ifRoom"/>
 
 </menu>

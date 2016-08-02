@@ -37,7 +37,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     private HashSet<Integer> unfoldedIndexes = new HashSet<>();
     private static RecyclerViewClickListener itemListener;
 
-    public RecyclerAdapter() {}
+    public RecyclerAdapter() {
+    }
+
     public RecyclerAdapter(Context context, List<Events> cur, RecyclerViewClickListener listener) {
         mContext = context;
         objects = cur;
@@ -93,15 +95,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
             if (v == this.bttnContentModify) {
                 itemListener.recyclerViewListClicked(1, v, this.getLayoutPosition());
-//                Intent intent = new Intent(MainActivity.context, AddingEventActivity.class);
-//                intent.putExtra("id", listViewItem.getId());
-//                intent.putExtra("name", listViewItem.getName());
-//                intent.putExtra("loop", listViewItem.getLoop());
-//                intent.putExtra("spinner", listViewItem.getKind() - 1);
-//                intent.putExtra("date", listViewItem.getDate());
-//                intent.putExtra("img", listViewItem.getImg());
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                MainActivity.context.startActivity(intent);
             }
         }
     }
@@ -110,7 +103,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Events listViewItem = objects.get(position);
-       // ViewHolder.listViewItem = objects.get(position);
+        // ViewHolder.listViewItem = objects.get(position);
         if (unfoldedIndexes.contains(position)) {
             ((FoldingCell) viewHolder.itemView).unfold(true);
         } else {
@@ -183,18 +176,33 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         viewHolder.txtTitleName.setText(listViewItem.getName());
 
         if (listViewItem.getDiff() > 0) {
-            viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
+            if (MainActivity.sharedPreferences.getBoolean(MainActivity.DISPLAY_DAY, true))
+                viewHolder.txtTitleCount.setText(String.valueOf(listViewItem.getDiff()));
+            else {
+                try {
+                    viewHolder.txtTitleCount.setText(listViewItem.getDiffString(0));
+                } catch (Exception e) {
+                }
+            }
             viewHolder.imgTitleArrow.setImageResource(R.drawable.arrow_right);
         } else if (listViewItem.getDiff() == 0) {
             viewHolder.imgTitleArrow.setVisibility(View.GONE);
             viewHolder.txtTitleCount.setText(String.valueOf(0));
-        } else
-            viewHolder.txtTitleCount.setText(String.valueOf(-listViewItem.getDiff()));
+        } else {
+            if (MainActivity.sharedPreferences.getBoolean(MainActivity.DISPLAY_DAY, true))
+                viewHolder.txtTitleCount.setText(String.valueOf(-listViewItem.getDiff()));
+            else {
+                try {
+                    viewHolder.txtTitleCount.setText(listViewItem.getDiffString(0));
+                } catch (Exception e) {
+                }
+            }
+        }
 
         viewHolder.txtContentDate.setText(listViewItem.getDate());
         viewHolder.txtContentName.setText(listViewItem.getName());
         try {
-            viewHolder.txtContentDiffDate.setText(listViewItem.getDiffString());
+            viewHolder.txtContentDiffDate.setText(listViewItem.getDiffString(1));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -235,10 +243,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         objects.remove(position);
         notifyItemRemoved(position);
         return objects;
-       // notifyItemRangeRemoved(position, objects.size());
+        // notifyItemRangeRemoved(position, objects.size());
     }
 
-    public void updateData(List<Events> events){
+    public void updateData(List<Events> events) {
         objects.clear();
         objects.addAll(events);
         notifyDataSetChanged();

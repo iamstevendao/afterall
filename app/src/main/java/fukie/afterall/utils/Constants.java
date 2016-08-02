@@ -52,7 +52,7 @@ public class Constants {
     // references to our images
     public static Integer[] background = {
             R.drawable.bg2, R.drawable.bg1,
-            R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
+            R.drawable.bg3, R.drawable.bg4, R.drawable.bg5,
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1,
             R.drawable.bg3, R.drawable.bg4, R.drawable.bg1

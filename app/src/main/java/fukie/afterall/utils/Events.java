@@ -146,11 +146,20 @@ public class Events {
 //        return string;
 //    }
 
-    public SpannableString getDiffString() throws Exception {
+    public SpannableString getDiffString(int display) throws Exception {
+        String displayYear = "Y";
+        String displayMonth = "M";
+        String displayDay = "D";
+        if (display == 1) {
+            displayYear = " years ";
+            displayMonth = " months ";
+            displayDay = " days ";
+        }
         SpannableString spannableString;
         String string = "";
         int sizeDate = MainActivity.context.getResources()
                 .getDimensionPixelSize(R.dimen.size_date_diff);
+        if (display == 0) sizeDate += 70;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
         Date event;
@@ -169,7 +178,8 @@ public class Events {
             month = -month;
             day = -day;
             day++;//fix bug 160701
-            string += "> ";
+            if (display == 1)
+                string += "> ";
         } else if (year == 0 && month == 0 && day == 0) {
             if (sdf.format(event).equals(now.toString(fmt))) {
                 string = "TODAY";
@@ -180,34 +190,42 @@ public class Events {
                 string += "> ";
                 day++;
             }
-        } else string += "> ";
+        } else if (display == 1)
+            string += "> ";
 
         String yearx = String.valueOf(year);
         String monthx = String.valueOf(month);
         String dayx = String.valueOf(day);
         boolean haveYear = false, haveMonth = false, haveDay = false;
-        int startYear = 2, startMonth = 2, startDay = 2;
+        int startYear = yearx.length();
+        int startMonth = monthx.length();
+        int startDay =dayx.length();
+        if (display == 1) {
+            startYear += 2;
+            startMonth += 2;
+            startDay += 2;
+        }
         if (year != 0) {
             haveYear = true;
-            string += yearx + " years ";
-            startMonth = string.length();
+            string += yearx + displayYear;
         }
         if (month != 0) {
             haveMonth = true;
-            string += monthx + " months ";
-            startDay = string.length();
+            startMonth = string.length() + monthx.length();
+            string += monthx + displayMonth;
         }
         if (day != 0) {
             haveDay = true;
-            string += dayx + " days ";
+            startDay = string.length() + dayx.length();
+            string += dayx + displayDay;
         }
         spannableString = new SpannableString(string);
         if (haveYear)
-            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startYear, startYear + yearx.length(), 0);
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startYear, startYear + displayYear.length(), 0);
         if (haveMonth)
-            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startMonth, startMonth + monthx.length(), 0);
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startMonth, startMonth + displayMonth.length(), 0);
         if (haveDay)
-            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startDay, startDay + dayx.length(), 0);
+            spannableString.setSpan(new AbsoluteSizeSpan(sizeDate), startDay, startDay + displayDay.length(), 0);
         return spannableString;
     }
 }

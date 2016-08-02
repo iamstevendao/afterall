@@ -112,6 +112,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     private static final String LAST_APP_VERSION = "last_app_version";
     public static final String IS_USE_SYNC = "is_use_sync";
     public static final String CAL_ID = "cal_id";
+    public static final String DISPLAY_DAY = "display";
+
     int currentVersionCode;
 
     private Drawer result = null;
@@ -122,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         setContentView(R.layout.activity_main);
         context = getApplication().getApplicationContext();
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("AfterAll");
@@ -148,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                         new SwitchDrawerItem()
                                 .withName("Display")
                                 .withIcon(GoogleMaterial.Icon.gmd_calendar)
-                                .withChecked(true)
+                                .withChecked(sharedPreferences.getBoolean(DISPLAY_DAY, true))
                                 .withDescription("Day Count")
                                 .withOnCheckedChangeListener(onCheckedChangeListener),
                         new DividerDrawerItem(),
@@ -193,8 +196,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             result.setSelection(21, false);
         }
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         lstEvent = (RecyclerView) findViewById(R.id.lstEvent);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.attachToRecyclerView(lstEvent);
@@ -236,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 }
                 sharedPreferences.edit().putInt(LAST_APP_VERSION, currentVersionCode).apply();
                 sharedPreferences.edit().putBoolean(IS_USE_SYNC, false).apply();
+                sharedPreferences.edit().putBoolean(DISPLAY_DAY, true).apply();
                 break;
             default:
                 break;
@@ -267,10 +269,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
             if (isChecked) {
                 ((SwitchDrawerItem) drawerItem).withDescription("Day Count");
+                sharedPreferences.edit().putBoolean(DISPLAY_DAY, true).apply();
             } else {
                 ((SwitchDrawerItem) drawerItem).withDescription("Year, Month, Day");
+                sharedPreferences.edit().putBoolean(DISPLAY_DAY, false).apply();
             }
             result.updateItem(drawerItem);
+            recyclerAdapter2.updateData(rearrangeList(databaseProcess.getAllEvent(-1)));
         }
     };
 
@@ -291,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
             databaseProcess.deleteWaitingEvent(listViewItems.get(position).getId());
             if (sharedPreferences.getBoolean(IS_USE_SYNC, false) && isDeviceOnline()) {
                 new SyncTask(listViewItems.get(position).getIdSync()
-                        , listViewItems.get(position).getName()
                         , MainActivity.this).execute();
             }
             listViewItems = recyclerAdapter2.removeAt(position);
@@ -433,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
     @Override
     public void onBackPressed() {
-        //handle the back press :D close the drawer first and if the drawer is closed close the activity
+        //handle the back press
         if (result != null && result.isDrawerOpen()) {
             result.closeDrawer();
         } else {
@@ -574,11 +578,5 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 connectionStatusCode,
                 REQUEST_GOOGLE_PLAY_SERVICES);
         dialog.show();
-    }
-
-    public void deleteEventCloud(String id) {
-        if (isDeviceOnline()) {
-
-        }
     }
 }

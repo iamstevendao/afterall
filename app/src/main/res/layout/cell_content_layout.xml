@@ -8,7 +8,7 @@
     <ImageView
         android:id="@+id/content_img_event"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:scaleType="centerCrop"
         android:src="@drawable/bg1" />
 
@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="end"
-            android:textSize="7pt"/>
+            android:textSize="9pt"/>
     </LinearLayout>
 
     <ImageView

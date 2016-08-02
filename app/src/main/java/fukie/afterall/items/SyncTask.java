@@ -50,7 +50,7 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
         this.activity = activity;
     }
 
-    public SyncTask(String syncId, String name, Activity activity) {
+    public SyncTask(String syncId, Activity activity) {
         this.function = Constants.TASK_DELETE;
         this.syncId = syncId;
         this.activity = activity;
@@ -136,9 +136,6 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
     }
 
     private void makeSync() throws IOException {
-        //DateTime now = new DateTime(System.currentTimeMillis());
-        // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        // Iterate through entries in calendar list
         String pageToken = null;
         String calID = "";
         boolean isExisted = false;
@@ -169,7 +166,7 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
             MainActivity.sharedPreferences.edit().putString(MainActivity.CAL_ID, calID).apply();
         }
         //160715
-        this.calId = calID;
+        calId = calID;
         pageToken = null;
         com.google.api.services.calendar.model.Events events
                 = mService.events().list(calID).setPageToken(pageToken).execute();
@@ -310,6 +307,7 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
             } else {
                 Toast.makeText(MainActivity.context, "The following error occurred: "
                         + mLastError.getMessage(), Toast.LENGTH_LONG).show();
+                System.out.println(mLastError.getMessage());
             }
         } else {
             Toast.makeText(MainActivity.context, "Request cancelled.", Toast.LENGTH_LONG).show();
@@ -317,7 +315,7 @@ public class SyncTask extends AsyncTask<Void, Void, Void> {
     }
 
     protected void onPreExecute() {
-        this.calId = MainActivity.sharedPreferences.getString(MainActivity.CAL_ID, "");
+        calId = MainActivity.sharedPreferences.getString(MainActivity.CAL_ID, "");
         mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, MainActivity.mCredential)
                 .setApplicationName("AfterAll")
