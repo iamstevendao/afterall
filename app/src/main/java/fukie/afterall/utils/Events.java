@@ -2,7 +2,6 @@ package fukie.afterall.utils;
 
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
-import android.text.style.RelativeSizeSpan;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -15,7 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import fukie.afterall.R;
-import fukie.afterall.activities.MainActivity;
+import fukie.afterall.activity.MainActivity;
 
 /**
  * Created by Fukie on 23/05/2016.

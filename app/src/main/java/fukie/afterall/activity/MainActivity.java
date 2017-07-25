@@ -1,8 +1,7 @@
-package fukie.afterall.activities;
+package fukie.afterall.activity;
 
 import android.Manifest;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.Notification;
@@ -15,7 +14,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -36,21 +34,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.Calendar;
-import com.google.api.services.calendar.model.CalendarList;
-import com.google.api.services.calendar.model.CalendarListEntry;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.melnykov.fab.FloatingActionButton;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
@@ -63,22 +49,19 @@ import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.ramotion.foldingcell.FoldingCell;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
-import fukie.afterall.items.NotificationPublisher;
+import fukie.afterall.utils.NotificationPublisher;
 import fukie.afterall.items.RecyclerViewClickListener;
 import fukie.afterall.items.SyncTask;
-import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
-import fukie.afterall.items.DividerItemDecoration;
-import fukie.afterall.items.RecyclerAdapter;
+import fukie.afterall.utils.DividerItemDecoration;
+import fukie.afterall.adapter.RecyclerAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -105,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     public static SharedPreferences sharedPreferences;
     public static RecyclerAdapter recyclerAdapter2;
 
-    public enum AppStart {
+    private enum AppStart {
         FIRST_TIME, FIRST_TIME_VERSION, NORMAL
     }
 

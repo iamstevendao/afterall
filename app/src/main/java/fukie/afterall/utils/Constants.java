@@ -1,11 +1,6 @@
 package fukie.afterall.utils;
 
-import android.support.v4.content.ContextCompat;
-
-import java.util.Map;
-
 import fukie.afterall.R;
-import fukie.afterall.activities.MainActivity;
 
 /**
  * Created by Fukie on 27/05/2016.

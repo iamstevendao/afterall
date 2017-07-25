@@ -1,4 +1,4 @@
-package fukie.afterall.items;
+package fukie.afterall.adapter;
 
 import android.content.Context;
 import android.database.Cursor;

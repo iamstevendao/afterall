@@ -1,12 +1,8 @@
-package fukie.afterall.items;
+package fukie.afterall.adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Typeface;
-import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,17 +10,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.HashSet;
 import java.util.List;
 
-import fukie.afterall.activities.AddingEventActivity;
-import fukie.afterall.activities.MainActivity;
+import fukie.afterall.activity.MainActivity;
+import fukie.afterall.items.RecyclerViewClickListener;
 import fukie.afterall.utils.Constants;
-import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
 import fukie.afterall.R;
 

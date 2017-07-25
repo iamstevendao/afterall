@@ -1,4 +1,4 @@
-package fukie.afterall.items;
+package fukie.afterall.utils;
 
 import android.content.Context;
 import android.content.res.TypedArray;

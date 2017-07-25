@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
 
-import fukie.afterall.activities.MainActivity;
+import fukie.afterall.activity.MainActivity;
 import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.utils.Events;
@@ -35,15 +35,15 @@ import fukie.afterall.utils.Events;
 public class SyncTask extends AsyncTask<Void, Void, Void> {
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
-    DatabaseProcess databaseProcess = new DatabaseProcess(MainActivity.context);
-    HttpTransport transport = AndroidHttp.newCompatibleTransport();
-    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    int function;
-    String syncId;
-    Events eventL;
-    static String calId;
-    Activity activity;
-    ProgressDialog progressDialog;
+    private DatabaseProcess databaseProcess = new DatabaseProcess(MainActivity.context);
+    private HttpTransport transport = AndroidHttp.newCompatibleTransport();
+    private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private int function;
+    private String syncId;
+    private Events eventL;
+    private static String calId;
+    private Activity activity;
+    private ProgressDialog progressDialog;
 
     public SyncTask(Activity activity) {
         this.function = Constants.TASK_SYNC;

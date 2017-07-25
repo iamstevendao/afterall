@@ -1,4 +1,4 @@
-package fukie.afterall.activities;
+package fukie.afterall.activity;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -37,14 +37,14 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-import fukie.afterall.items.DividerItemDecoration;
-import fukie.afterall.items.ImageAdapter;
+import fukie.afterall.utils.DividerItemDecoration;
+import fukie.afterall.adapter.ImageAdapter;
 import fukie.afterall.items.RecyclerItemClickListener;
 import fukie.afterall.items.SyncTask;
 import fukie.afterall.utils.Constants;
 import fukie.afterall.utils.DatabaseProcess;
 import fukie.afterall.R;
-import fukie.afterall.items.SpinnerAdapter;
+import fukie.afterall.adapter.SpinnerAdapter;
 import fukie.afterall.utils.Events;
 
 public class AddingEventActivity extends AppCompatActivity {
@@ -65,7 +65,6 @@ public class AddingEventActivity extends AppCompatActivity {
     RelativeLayout backgroundHolder;
     boolean isFromIntent = false;
     Intent i;
-    MainActivity main = new MainActivity();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
