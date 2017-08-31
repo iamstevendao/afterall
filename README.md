@@ -1,12 +1,14 @@
 # Superfast Dictionary
 > Day Counting Android Application  
-> Contact me: [@iamstevendao](https://twitter.com/iamstevendao), [linkedIn@iamstevendao](https://www.linkedin.com/in/steven-dao-b9a065127/)  
+> Contact me: [@iamstevendao](https://twitter.com/iamstevendao), [linkedIn@iamstevendao](https://www.linkedin.com/in/steven-dao-b9a065127/) 
+
+[![FoldingCell](https://img.shields.io/badge/github-FoldingCell-red.svg)](https://github.com/Ramotion/folding-cell-android) [![GoogleCalendarAPI](https://img.shields.io/badge/Google-CalendarAPI-red.svg)](https://developers.google.com/google-apps/calendar/)
 
 ## Table of contents
 - [Requirements](#requirements)
 - [Screenshots](#screenshots)
 - [Usage](#usage)
-- [License](#license)`
+- [License](#license)
 
 ## Requirements
 - Android Studio
@@ -15,4 +17,5 @@
 ## Usage
 ## License
 AfterAll is opensource, contribution and feed back are very welcome.  
+This project is distributed under [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Ramotion/folding-cell-android/blob/master/LICENSE.md) as it covers the [FoldingCell](https://github.com/Ramotion/folding-cell-android) project
 
