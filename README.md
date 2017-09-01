@@ -1,4 +1,4 @@
-# Superfast Dictionary
+# AfterAll
 > Day Counting Android Application  
 > Contact me: [@iamstevendao](https://twitter.com/iamstevendao), [linkedIn@iamstevendao](https://www.linkedin.com/in/steven-dao-b9a065127/) 
 
