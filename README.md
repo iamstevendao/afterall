@@ -1,8 +1,7 @@
 # AfterAll
 > Day Counting Android Application  
-> Contact me: [@iamstevendao](https://twitter.com/iamstevendao), [linkedIn@iamstevendao](https://www.linkedin.com/in/steven-dao-b9a065127/) 
 
-[![FoldingCell](https://img.shields.io/badge/github-FoldingCell-red.svg)](https://github.com/Ramotion/folding-cell-android) [![GoogleCalendarAPI](https://img.shields.io/badge/Google-CalendarAPI-red.svg)](https://developers.google.com/google-apps/calendar/)
+[![@iamstevendao](https://img.shields.io/badge/twitter-@iamstevendao-blue.svg)](https://twitter.com/iamstevendao) [![@linkedin](https://img.shields.io/badge/LinkedIn-@iamstevendao-blue.svg)](https://www.linkedin.com/in/steven-dao-b9a065127/) [![FoldingCell](https://img.shields.io/badge/github-FoldingCell-red.svg)](https://github.com/Ramotion/folding-cell-android) [![GoogleCalendarAPI](https://img.shields.io/badge/Google-CalendarAPI-red.svg)](https://developers.google.com/google-apps/calendar/)
 
 ## Table of contents
 - [Requirements](#requirements)
