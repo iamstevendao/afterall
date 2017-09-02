@@ -14,7 +14,7 @@ Currently in beta in Google Store, contact me if you would like to join, everyon
 - Android Studio
 - Android 4.0 IceCreamSandwich (API lvl 14) or greater (for Folding Cell intergration)
 ## Screenshots
-![Screenshot](screenshots/screenshot.png)
+![Screenshot](screenshots/grid_screenshot.jpg)
 
 ## License
 AfterAll is opensource, contribution and feed back are very welcome.  
